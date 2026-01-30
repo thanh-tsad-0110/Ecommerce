@@ -1,5 +1,5 @@
 /**
- * FILE: App.tsx
+
  * ROOT ENTRY POINT - Wraps entire application with providers and navigation
  * 
  * This is the main file that starts the application. Think of it like the
