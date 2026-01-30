@@ -1,3 +1,2 @@
 Ghi chú bài tập
 - Viết README
-- Chuẩn bị screenshots
