@@ -1,97 +1,67 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🛒 E-commerce App - React Native + TypeScript
 
-# Getting Started
+Bài Tập 3: Ứng dụng E-commerce chuyên nghiệp được xây dựng với React Native, TypeScript và React Navigation.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+**Được viết bằng các bình luận chi tiết cho người bắt đầu!** 💡
 
-## Step 1: Start Metro
+---
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 📦 Tính Năng Chính
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+✅ **Tab Navigation** - 5 tab chính: Home, Search, Cart, Favorites, Profile  
+✅ **Product Catalog** - Hiển thị sản phẩm với carousel, danh mục, bộ lọc  
+✅ **Search** - Tìm kiếm với lịch sử, trending, bộ lọc, sắp xếp  
+✅ **Shopping Cart** - Giỏ hàng, mã giảm giá (SAVE50, FREE10), tính thuế vận chuyển  
+✅ **Multi-step Checkout** - 3 bước (Địa chỉ → Thanh toán → Xem lại) với xác thực  
+✅ **Favorites** - Danh sách sản phẩm yêu thích  
+✅ **Order History** - Lịch sử đơn hàng với bộ lọc trạng thái  
+✅ **Order Tracking** - Xem chi tiết đơn hàng, theo dõi vận chuyển  
+✅ **User Profile** - Thông tin người dùng, menu cài đặt, logout  
+✅ **State Management** - Context API với useReducer pattern (không Redux)  
+✅ **Type Safety** - TypeScript cho tất cả files  
 
-```sh
-# Using npm
-npm start
+---
 
-# OR using Yarn
-yarn start
+## 📁 Cấu Trúc Dự Án
+
 ```
+Ecommerce/
+├── App.tsx                          # 🚀 Entry point chính - Wrapper ứng dụng
+├── app.json                         # Cấu hình ứng dụng React Native
+├── package.json                     # Dependencies + Scripts
+├── tsconfig.json                    # TypeScript configuration
+├── jest.config.js                   # Test configuration
+├── metro.config.js                  # React Native bundler config
+│
+├── src/                             # 📂 Tất cả code chính ở đây
+│   ├── types/
+│   │   └── index.ts                 # ✅ Tất cả TypeScript interfaces/types
+│   │                                # → Product, CartItem, Order, User, etc.
+│   │
+│   ├── constants/
+│   │   └── index.ts                 # ✅ Các hằng số: màu, khoảng cách, tin nhắn, rules
+│   │                                # → Thay vì hardcode giá trị, dùng constants
+│   │
+│   ├── styles/
+│   │   └── theme.ts                 # ✅ Hệ thống thiết kế: màu, typography, component styles
+│   │                                # → Giúp app có giao diện nhất quán
+│   │
+│   ├── state/                       # 🔴 State Management với Context API
+│   │   ├── CartContext.tsx          # ✅ Quản lý giỏ hàng (add/remove/update quantity)
+│   │   ├── FavoritesContext.tsx     # ✅ Quản lý danh sách yêu thích
+│   │   └── UserContext.tsx          # ✅ Quản lý thông tin người dùng + đăng nhập
+│   │
+│   ├── components/                  # 🎨 Reusable components
+│   │   ├── CustomButton.tsx         # ✅ Button có 3 biến thể (primary/secondary/outline)
+│   │   ├── CustomInput.tsx          # ✅ Input field với label, error message, validation
+│   │   └── ProductCard.tsx          # ✅ Card sản phẩm (grid/list view, badge, yêu thích)
+│   │
+│   ├── services/\n│   │   └── api.ts                    # ✅ API calls với retry logic, timeout\n│   │                                # → Sẵn sàng kết nối backend thực\n│   │\n│   ├── utils/                       # 🛠️ Utility functions\n│   │   ├── validation.ts            # ✅ Validate email, password, phone number, thẻ\n│   │   └── formatting.ts            # ✅ Format giá tiền, ngày tháng, số điện thoại\n│   │\n│   ├── navigation/\n│   │   └── RootNavigator.tsx        # ✅ Cấu hình điều hướng toàn bộ app\n│   │                                # → 5 tab + stack navigation chi tiết\n│   │\n│   └── screens/                     # 📱 Tất cả màn hình app\n│       ├── HomeScreen.tsx           # ✅ Trang chủ: carousel, categories, products\n│       ├── SearchScreen.tsx         # ✅ Tìm kiếm: history, trending, filter, sort\n│       ├── CartScreen.tsx           # ✅ Giỏ hàng: items, promo codes, shipping\n│       ├── FavoritesScreen.tsx      # ✅ Danh sách yêu thích\n│       ├── ProfileScreen.tsx        # ✅ Hồ sơ người dùng, menu, logout\n│       ├── ProductDetailScreen.tsx  # ✅ Chi tiết sản phẩm: carousel, specs, mua\n│       ├── CheckoutScreen.tsx       # ✅ Thanh toán 3 bước: địa chỉ, payment, xem lại\n│       ├── OrderHistoryScreen.tsx   # ✅ Lịch sử đơn hàng với bộ lọc\n│       ├── OrderDetailsScreen.tsx   # ✅ Chi tiết đơn hàng: tracking, items, summary\n│       └── SettingsScreen.tsx       # ✅ Cài đặt: dark mode, notifications, about\n│\n└── android/ & ios/                  # 📱 Native code (tự động generate)\n    └── [Build files, config, resources]\n```
 
-## Step 2: Build and run your app
+---
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## 🚀 Hướng Dẫn Cài Đặt & Chạy App
 
-### Android
+### Bước 1: Cài Đặt Dependencies
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+```bash\nnpm install\n# hoặc\nyarn install\n```\n\n### Bước 2: Cài Đặt CocoaPods (iOS only)\n\n```bash\ncd ios\npod install\ncd ..\n```\n\n### Bước 3: Chạy Ứng Dụng\n\n**iOS:**\n```bash\nnpm run ios\n# hoặc\nreact-native run-ios\n```\n\n**Android:**\n```bash\nnpm run android\n# hoặc\nreact-native run-android\n```\n\n---\n\n## 📚 Giải Thích Kiến Trúc\n\n### 1️⃣ **Types System** (`src/types/index.ts`)\n\n```typescript\n// Ví dụ: Định nghĩa loại sản phẩm\ninterface Product {\n  id: string;\n  name: string;        // Tên sản phẩm\n  price: number;       // Giá gốc\n  discountPrice?: number; // Giá sau giảm\n  image: string;       // URL ảnh\n  // ... thêm properties\n}\n```\n\n**Lợi ích:** Tất cả chỗ dùng Product đều biết nó có những property gì → Không lỗi typo!\n\n---\n\n### 2️⃣ **Constants** (`src/constants/index.ts`)\n\n```typescript\n// ❌ Cách SAI: Hardcode giá trị khắp nơi\nconst buttonColor = '#FF6B35'; // Sao không đổi ở một chỗ?\n\n// ✅ Cách ĐÚNG: Dùng constants\nconst COLORS = {\n  primary: '#FF6B35',\n  secondary: '#004E89',\n};\n// Bây giờ thay đổi màu ở một chỗ, tất cả button sẽ thay đổi!\n```\n\n**Lợi ích:** Thay đổi giao diện (màu, font, khoảng cách) dễ dàng!\n\n---\n\n### 3️⃣ **Context API State Management** (`src/state/`)\n\n**Bạn cần hiểu:** Context API là cách chia sẻ dữ liệu giữa các component mà không cần prop drilling.\n\n**Ví dụ - CartContext:**\n\n```typescript\n// Tạo Context\nconst CartContext = createContext<CartContextType | undefined>(undefined);\n\n// Provider component\nconst CartProvider: React.FC<{children: React.ReactNode}> = ({children}) => {\n  // State quản lý giỏ hàng\n  const [cart, dispatch] = useReducer(cartReducer, initialState);\n  \n  return (\n    <CartContext.Provider value={{state: cart, dispatch}}>\n      {children}  {/* Tất cả child components có thể dùng cart */}\n    </CartContext.Provider>\n  );\n};\n\n// Hook để dùng trong components\nconst useCart = () => {\n  const context = useContext(CartContext);\n  if (!context) throw new Error('useCart must be used inside CartProvider');\n  return context;\n};\n\n// Sử dụng trong component:\nconst MyComponent = () => {\n  const { state, addToCart } = useCart(); // Lấy cart data từ Context!\n};\n```\n\n**Lợi ích:** Không cần Redux, đơn giản, dễ học!\n\n---\n\n### 4️⃣ **Design System** (`src/styles/theme.ts`)\n\n```typescript\n// Thay vì:\nconst styles = StyleSheet.create({\n  title: {\n    fontSize: 24,\n    fontWeight: '700',\n    color: '#1A1A1A',\n  },\n  subtitle: {\n    fontSize: 16,\n    fontWeight: '600',\n    color: '#1A1A1A',\n  },\n  // ... cùng giá trị lặp lại!\n});\n\n// Dùng theme:\nconst typography = {\n  heading1: {\n    fontSize: FONT_SIZES.xl,\n    fontWeight: FONT_WEIGHTS.bold,\n    color: COLORS.text,\n  },\n  heading2: {\n    fontSize: FONT_SIZES.lg,\n    fontWeight: FONT_WEIGHTS.semibold,\n    color: COLORS.text,\n  },\n};\n\n// Sử dụng: ...typography.heading1\n```\n\n**Lợi ích:** Nhất quán, dễ bảo trì, không lặp code!\n\n---\n\n### 5️⃣ **Reusable Components** (`src/components/`)\n\n**CustomButton - 3 biến thể, 3 kích thước:**\n\n```typescript\n<CustomButton\n  title=\"Mua hàng\"\n  variant=\"primary\"  // 'primary' | 'secondary' | 'outline'\n  size=\"large\"       // 'small' | 'medium' | 'large'\n  onPress={() => handlePurchase()}\n  loading={isProcessing}  // Hiển thị spinner khi xử lý\n/>\n```\n\n**Lợi ích:** Viết 1 lần, dùng 100 lần! Code sạch, logic tập trung.\n\n---\n\n### 6️⃣ **API Service** (`src/services/api.ts`)\n\n```typescript\n// Tính năng: Retry logic + Timeout + Error handling\nconst getProducts = async (page: number) => {\n  // retryRequest sẽ thử lại 3 lần nếu thất bại\n  return retryRequest(() =>\n    fetchWithTimeout(`/products?page=${page}`, {\n      timeout: 30000, // 30 giây timeout\n    })\n  );\n};\n\n// Khi API thực sự sẵn sàng:\n// 1. Thay mock data bằng API call thực\n// 2. Thêm authentication header\n// 3. Xử lý error từ API\n```\n\n**Lợi ích:** Sẵn sàng kết nối backend!\n\n---\n\n### 7️⃣ **Screen Structure**\n\nMỗi screen có cấu trúc tương tự:\n\n```typescript\nconst MyScreen: React.FC = () => {\n  // 1️⃣ State cho screen này\n  const [data, setData] = useState([]);\n  const [isLoading, setIsLoading] = useState(false);\n  \n  // 2️⃣ Dùng Contexts (nếu cần)\n  const { items, addToCart } = useCart();\n  const { user } = useUser();\n  \n  // 3️⃣ Effects: Load data khi component mount\n  useEffect(() => {\n    loadData();\n  }, []);\n  \n  // 4️⃣ Event handlers\n  const handlePress = () => { ... };\n  \n  // 5️⃣ Render UI\n  return (\n    <SafeAreaView>\n      <ScrollView>\n        {/* Component tree */}\n      </ScrollView>\n    </SafeAreaView>\n  );\n};\n```\n\n---\n\n## 🎯 Cách Thêm Màn Hình Mới\n\n### Bước 1: Tạo file screen\n```bash\n# Tạo src/screens/MyNewScreen.tsx\n```\n\n### Bước 2: Viết screen component\n```typescript\nimport React from 'react';\nimport { View, Text, SafeAreaView, StyleSheet } from 'react-native';\nimport { COLORS, SPACING } from '../constants';\n\nconst MyNewScreen: React.FC = () => {\n  return (\n    <SafeAreaView style={styles.container}>\n      <Text>Màn hình mới!</Text>\n    </SafeAreaView>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    flex: 1,\n    backgroundColor: COLORS.background,\n  },\n});\n\nexport default MyNewScreen;\n```\n\n### Bước 3: Thêm vào navigation (`src/navigation/RootNavigator.tsx`)\n```typescript\n<Stack.Screen\n  name=\"MyNewScreen\"\n  component={MyNewScreen}\n  options={{ title: 'Màn hình mới' }}\n/>\n```\n\n### Bước 4: Navigate tới màn hình mới\n```typescript\nconst navigation = useNavigation();\nnavigation.navigate('MyNewScreen');\n```\n\n---\n\n## 🔗 Kết Nối Với API Backend Thực\n\n### Bước 1: Cập nhật `src/services/api.ts`\n\n```typescript\n// Đổi BASE_URL\nconst BASE_URL = 'https://your-api.com'; // Thay URL backend của bạn\n\n// Thêm authentication\nconst getAuthToken = async () => {\n  return await AsyncStorage.getItem('authToken');\n};\n\nconst getProducts = async (page: number) => {\n  const token = await getAuthToken();\n  return retryRequest(() =>\n    fetchWithTimeout(`${BASE_URL}/products?page=${page}`, {\n      headers: {\n        'Authorization': `Bearer ${token}`,\n      },\n    })\n  );\n};\n```\n\n### Bước 2: Cập nhật screens\n\n```typescript\n// Thay mock data bằng API call\nconst loadProducts = async () => {\n  setIsLoading(true);\n  try {\n    const data = await getProducts(1); // Gọi API thực!\n    setProducts(data);\n  } catch (error) {\n    setError(error.message);\n  } finally {\n    setIsLoading(false);\n  }\n};\n```\n\n---\n\n## 📱 Giải Thích Một Số Khái Niệm\n\n### **useEffect Hook**\n```typescript\n// Chạy code khi component mount\nuseEffect(() => {\n  loadData(); // Chỉ chạy 1 lần khi screen hiển thị\n}, []);\n\n// Chạy lại khi dependency thay đổi\nuseEffect(() => {\n  // Nếu userId thay đổi, chạy lại effect này\n  loadUserData(userId);\n}, [userId]);\n```\n\n### **FlatList vs ScrollView**\n```typescript\n// ScrollView: Tất cả items được render → Chậm nếu nhiều items\n<ScrollView>\n  {items.map(item => <Item key={item.id} data={item} />)}\n</ScrollView>\n\n// FlatList: Chỉ render items hiển thị trên màn hình → Nhanh hơn!\n<FlatList\n  data={items}\n  renderItem={({item}) => <Item data={item} />}\n  keyExtractor={(item) => item.id}\n  numColumns={2}\n/>\n```\n\n### **TypeScript Interfaces vs Types**\n```typescript\n// Interface: Tập hợp properties\ninterface User {\n  id: string;\n  name: string;\n  email: string;\n}\n\n// Sử dụng:\nconst user: User = {\n  id: '123',\n  name: 'John',\n  email: 'john@example.com',\n};\n```\n\n---\n\n## ✅ Checklist - Khi Nộp Bài\n\n- [ ] ✅ Tất cả 5 tab hoạt động (Home, Search, Cart, Favorites, Profile)\n- [ ] ✅ Stack navigation tới chi tiết sản phẩm, checkout, order history\n- [ ] ✅ State management với Context API (Cart, Favorites, User)\n- [ ] ✅ Search với filter/sort\n- [ ] ✅ 3-step checkout form\n- [ ] ✅ Order history + detail\n- [ ] ✅ TypeScript types\n- [ ] ✅ Reusable components\n- [ ] ✅ Code comments giải thích\n- [ ] ✅ Responsive design\n- [ ] ✅ Empty states\n- [ ] ✅ Loading states\n- [ ] ✅ Error handling\n\n---\n\n## 🐛 Troubleshooting\n\n### Lỗi: \"Module not found\"\n```bash\n# Xóa node_modules và cài lại\nrm -rf node_modules package-lock.json\nnpm install\n```\n\n### Lỗi: \"Context undefined\"\n```typescript\n// Đảm bảo component được wrap bởi Provider trong App.tsx\n// ❌ SAI: useCart bên ngoài CartProvider\n// ✅ ĐÚNG: useCart bên trong CartProvider\n```\n\n### App chạy chậm\n```typescript\n// Dùng FlatList thay ScrollView cho danh sách lớn\n// Thêm useMemo cho expensive computations\nconst memoizedData = useMemo(() => {\n  return expensiveOperation(data);\n}, [data]);\n```\n\n---\n\n## 📖 Tài Liệu Tham Khảo\n\n- [React Native Docs](https://reactnative.dev/docs/getting-started)\n- [React Navigation](https://reactnavigation.org/)\n- [TypeScript Handbook](https://www.typescriptlang.org/docs/)\n- [Context API](https://react.dev/reference/react/useContext)\n\n---\n\n## 📝 Ghi Chú\n\nBài tập này được thiết kế để:\n- ✅ Học React Native fundamentals\n- ✅ Hiểu State Management\n- ✅ Làm việc với Navigation\n- ✅ Viết TypeScript\n- ✅ Build professional UI\n- ✅ Best practices\n\nTất cả code đều có comment chi tiết cho người bắt đầu! 💡\n\n---\n\n**Happy Coding! 🚀**\n
