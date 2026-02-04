@@ -15,6 +15,7 @@
 
 import React from 'react';
 import { StyleSheet, StatusBar } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 
@@ -48,20 +49,20 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <SafeAreaProvider>
-      {/* NESTED PROVIDERS - Order matters! */}
-      {/* 
-      */}
-      <CartProvider>
-        <FavoritesProvider>
-          <UserProvider>
-            <ThemeProvider>
-              <AppContent />
-            </ThemeProvider>
-          </UserProvider>
-        </FavoritesProvider>
-      </CartProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={styles.container}>
+      <SafeAreaProvider>
+        {/* NESTED PROVIDERS - Order matters! */}
+        <CartProvider>
+          <FavoritesProvider>
+            <UserProvider>
+              <ThemeProvider>
+                <AppContent />
+              </ThemeProvider>
+            </UserProvider>
+          </FavoritesProvider>
+        </CartProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 };
 

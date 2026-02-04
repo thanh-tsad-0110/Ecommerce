@@ -6,6 +6,7 @@ declare module 'react-native' {
   export const StyleSheet: { create: (styles: any) => any };
   export const ScrollView: React.ComponentType<any>;
   export const TextInput: React.ComponentType<any>;
+  export const Image: React.ComponentType<any>;
   export const TouchableOpacity: React.ComponentType<any>;
   export const SafeAreaView: React.ComponentType<any>;
   export const FlatList: React.ComponentType<any>;

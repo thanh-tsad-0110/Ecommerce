@@ -18,12 +18,20 @@ import { RootStackParamList, OrderStatus } from '../types';
 import { formatPrice, formatDate } from '../utils/formatting';
 
 type OrderHistoryProps = NativeStackScreenProps<RootStackParamList, 'OrderHistory'>;
+type OrderSummary = {
+  id: string;
+  orderNumber: string;
+  date: string;
+  status: OrderStatus;
+  total: number;
+  items: number;
+};
 
 const OrderHistoryScreen: React.FC<OrderHistoryProps> = ({ navigation }) => {
   const [filterStatus, setFilterStatus] = useState<OrderStatus | 'all'>('all');
 
   // Mock orders
-  const orders = [
+  const orders: OrderSummary[] = [
     {
       id: '1',
       orderNumber: 'ORD-2026-001',
@@ -88,7 +96,7 @@ const OrderHistoryScreen: React.FC<OrderHistoryProps> = ({ navigation }) => {
     }
   };
 
-  const renderOrderItem = ({ item }: { item: typeof orders[0] }) => (
+  const renderOrderItem = ({ item }: { item: OrderSummary }) => (
     <TouchableOpacity
       style={styles.orderCard}
       onPress={() => navigation.navigate('OrderDetails', { orderId: item.id })}
@@ -157,7 +165,7 @@ const OrderHistoryScreen: React.FC<OrderHistoryProps> = ({ navigation }) => {
           <FlatList
             data={orders}
             renderItem={renderOrderItem}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item: OrderSummary) => item.id}
             scrollEnabled={false}
             contentContainerStyle={styles.listContent}
           />

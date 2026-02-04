@@ -3,8 +3,8 @@
  * GIẢI THÍCH: Context để quản lý theme (Light/Dark mode)
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useUser } from './UserContext';
+import React, { createContext, useContext, ReactNode, useMemo } from 'react';
+import { useUIStore } from './uiStore';
 
 // Light Theme Colors
 export const LIGHT_COLORS = {
@@ -63,37 +63,14 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { user, updateUser } = useUser();
-    const [isDark, setIsDark] = useState(user?.preferences?.darkMode || false);
+    const { theme, toggleTheme } = useUIStore();
+    const isDark = theme === 'dark';
 
-    // Sync với user preferences
-    useEffect(() => {
-        if (user?.preferences?.darkMode !== undefined) {
-            setIsDark(user.preferences.darkMode);
-        }
-    }, [user?.preferences?.darkMode]);
-
-    const toggleTheme = () => {
-        const newValue = !isDark;
-        setIsDark(newValue);
-
-        if (user) {
-            updateUser({
-                preferences: {
-                    ...user.preferences,
-                    darkMode: newValue,
-                },
-            });
-        }
-    };
-
-    const colors = isDark ? DARK_COLORS : LIGHT_COLORS;
-
-    const value: ThemeContextType = {
-        colors,
+    const value: ThemeContextType = useMemo(() => ({
+        colors: isDark ? DARK_COLORS : LIGHT_COLORS,
         isDark,
         toggleTheme,
-    };
+    }), [isDark, toggleTheme]);
 
     return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
