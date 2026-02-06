@@ -6,8 +6,11 @@
  * - Dễ quản lý, thay đổi logic API một chỗ là áp dụng toàn bộ app
  */
 
-import { ApiResponse, PaginatedResponse, Product, Order, User } from '../types';
+import { PaginatedResponse, Product, Order, User } from '../types';
 import { APP_CONFIG } from '../constants';
+import { mmkv } from '../state/storage';
+
+const AUTH_TOKEN_KEY = 'auth-token';
 
 /**
  * Base config cho tất cả API calls
@@ -318,22 +321,21 @@ export const validatePromoCode = async (code: string): Promise<any> => {
  * Thường được lưu sau khi đăng nhập
  */
 export const getAuthToken = async (): Promise<string> => {
-  // TODO: Implement lấy token từ AsyncStorage
-  return '';
+  return mmkv.getString(AUTH_TOKEN_KEY) ?? '';
 };
 
 /**
  * setAuthToken: Lưu auth token
  */
 export const setAuthToken = async (token: string): Promise<void> => {
-  // TODO: Implement lưu token vào AsyncStorage
+  mmkv.set(AUTH_TOKEN_KEY, token);
 };
 
 /**
  * clearAuthToken: Xóa auth token
  */
 export const clearAuthToken = async (): Promise<void> => {
-  // TODO: Implement xóa token khỏi AsyncStorage
+  mmkv.delete(AUTH_TOKEN_KEY);
 };
 
 export default {

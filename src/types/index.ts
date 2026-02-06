@@ -286,6 +286,7 @@ export interface ButtonProps {
   loading?: boolean;
   icon?: React.ReactNode;
   style?: any;
+  className?: string;
 }
 
 /**
@@ -299,9 +300,13 @@ export interface InputProps {
   error?: string;           // Thông báo lỗi
   helperText?: string;      // Gợi ý
   icon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  onRightIconPress?: () => void;
   disabled?: boolean;
   secureTextEntry?: boolean; // Ẩn text (cho password)
   style?: any;
+  className?: string;
+  inputClassName?: string; // Class cho ô input (container) để tuỳ chỉnh nhanh
 }
 
 /**

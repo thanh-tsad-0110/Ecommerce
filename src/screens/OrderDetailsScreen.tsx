@@ -20,6 +20,7 @@ import {
   BORDER_RADIUS,
 } from '../constants';
 import { RootStackParamList } from '../types';
+import { useTheme } from '../state/ThemeContext';
 import { formatPrice } from '../utils/formatting';
 import CustomButton from '../components/CustomButton';
 
@@ -33,6 +34,7 @@ const OrderDetailsScreen: React.FC<OrderDetailsProps> = ({
   navigation,
 }) => {
   const { orderId } = route.params;
+  const { colors } = useTheme();
 
   // Mock order detail
   const order = {
@@ -62,6 +64,8 @@ const OrderDetailsScreen: React.FC<OrderDetailsProps> = ({
     trackingNumber: 'TRK12345678',
     estimatedDelivery: '2026-01-22',
   };
+
+  const styles = getStyles(colors);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -99,7 +103,7 @@ const OrderDetailsScreen: React.FC<OrderDetailsProps> = ({
         {/* ITEMS */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sản phẩm</Text>
-          {order.items.map(item => (
+          {order.items.map((item) => (
             <View key={item.id} style={styles.itemRow}>
               <View>
                 <Text style={styles.itemName}>{item.name}</Text>
@@ -119,23 +123,23 @@ const OrderDetailsScreen: React.FC<OrderDetailsProps> = ({
           <Text style={styles.sectionTitle}>Tóm tắt</Text>
 
           <View style={styles.summaryRow}>
-            <Text>Tiền hàng</Text>
-            <Text>{formatPrice(order.subtotal)}</Text>
+            <Text style={{ color: colors.text }}>Tiền hàng</Text>
+            <Text style={{ color: colors.text }}>{formatPrice(order.subtotal)}</Text>
           </View>
 
           <View style={styles.summaryRow}>
-            <Text>Vận chuyển</Text>
-            <Text>{formatPrice(order.shipping)}</Text>
+            <Text style={{ color: colors.text }}>Vận chuyển</Text>
+            <Text style={{ color: colors.text }}>{formatPrice(order.shipping)}</Text>
           </View>
 
           <View style={styles.summaryRow}>
-            <Text>Thuế</Text>
-            <Text>{formatPrice(order.tax)}</Text>
+            <Text style={{ color: colors.text }}>Thuế</Text>
+            <Text style={{ color: colors.text }}>{formatPrice(order.tax)}</Text>
           </View>
 
           <View style={styles.summaryRow}>
-            <Text>Giảm giá</Text>
-            <Text>-{formatPrice(order.discount)}</Text>
+            <Text style={{ color: colors.text }}>Giảm giá</Text>
+            <Text style={{ color: colors.success }}>-{formatPrice(order.discount)}</Text>
           </View>
 
           <View style={[styles.summaryRow, styles.totalRow]}>
@@ -165,7 +169,7 @@ const OrderDetailsScreen: React.FC<OrderDetailsProps> = ({
         {/* PAYMENT */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Thanh toán</Text>
-          <Text>{order.paymentMethod}</Text>
+          <Text style={{ color: colors.text }}>{order.paymentMethod}</Text>
         </View>
 
         {/* BUTTONS */}
@@ -188,33 +192,35 @@ const OrderDetailsScreen: React.FC<OrderDetailsProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   header: {
     padding: SPACING.lg,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: colors.border,
   },
   orderNumber: {
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
+    color: colors.text,
   },
   status: {
     marginTop: SPACING.sm,
-    color: COLORS.success,
+    color: colors.success,
   },
   section: {
     padding: SPACING.lg,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: colors.border,
   },
   sectionTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
     marginBottom: SPACING.md,
+    color: colors.text,
   },
   trackingStep: {
     flexDirection: 'row',
@@ -225,19 +231,20 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: COLORS.success,
-    color: COLORS.textInverse,
+    backgroundColor: colors.success,
+    color: colors.textInverse,
     textAlign: 'center',
     lineHeight: 28,
     marginRight: SPACING.md,
   },
   trackingLabel: {
     fontSize: FONT_SIZES.md,
+    color: colors.text,
   },
   trackingNumber: {
     marginTop: SPACING.sm,
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textLight,
+    color: colors.textLight,
   },
   itemRow: {
     flexDirection: 'row',
@@ -246,14 +253,15 @@ const styles = StyleSheet.create({
   },
   itemName: {
     fontWeight: FONT_WEIGHTS.semibold,
+    color: colors.text,
   },
   itemQty: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textLight,
+    color: colors.textLight,
   },
   itemPrice: {
     fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.primary,
+    color: colors.primary,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -263,31 +271,34 @@ const styles = StyleSheet.create({
   totalRow: {
     marginTop: SPACING.sm,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: colors.border,
     paddingTop: SPACING.md,
   },
   totalLabel: {
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
+    color: colors.text,
   },
   totalValue: {
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.primary,
+    color: colors.primary,
   },
   addressBox: {
-    backgroundColor: COLORS.backgroundDark,
+    backgroundColor: colors.backgroundDark,
     padding: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
   },
   addressName: {
     fontWeight: FONT_WEIGHTS.bold,
+    color: colors.text,
   },
   addressPhone: {
-    color: COLORS.textLight,
+    color: colors.textLight,
   },
   addressText: {
     marginTop: SPACING.xs,
+    color: colors.text,
   },
   buttonsContainer: {
     padding: SPACING.lg,

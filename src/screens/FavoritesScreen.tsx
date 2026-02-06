@@ -7,8 +7,9 @@ import { View, Text, StyleSheet, FlatList, SafeAreaView } from 'react-native';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { BottomTabParamList, RootStackParamList, Product } from '../types';
+import { useTheme } from '../state/ThemeContext';
 import { useFavorites } from '../state/FavoritesContext';
 import { useCart } from '../state/CartContext';
 import ProductCard from '../components/ProductCard';
@@ -22,6 +23,8 @@ type FavoritesScreenProps = CompositeScreenProps<
 const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) => {
   const { items: favorites, removeFromFavorites } = useFavorites();
   const { addToCart } = useCart();
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
 
   if (favorites.length === 0) {
     return (
@@ -32,7 +35,7 @@ const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) => {
           <Text style={styles.emptyText}>Chưa có sản phẩm yêu thích nào</Text>
           <CustomButton
             title="Khám phá sản phẩm"
-            onPress={() => navigation.navigate('Home')}
+            onPress={() => navigation.navigate('MainTabs', { screen: 'Home' })}
             variant="primary"
             size="large"
             style={{ marginTop: SPACING.lg }}
@@ -73,10 +76,10 @@ const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   emptyContainer: {
     flex: 1,
@@ -91,12 +94,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: FONT_SIZES.xl,
     fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.text,
+    color: colors.text,
     marginBottom: SPACING.sm,
   },
   emptyText: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.textLight,
+    color: colors.textLight,
   },
   header: {
     paddingHorizontal: SPACING.lg,
@@ -105,7 +108,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.text,
+    color: colors.text,
   },
 });
 

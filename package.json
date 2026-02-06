@@ -42,6 +42,7 @@
     "postcss": "^8.4.47",
     "prettier": "2.8.8",
     "react-test-renderer": "19.2.0",
+    "react-native-worklets": "file:./react-native-worklets",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.8.3"
   },

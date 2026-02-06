@@ -8,11 +8,11 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   TouchableOpacity,
   Image,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -87,6 +87,17 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           </View>
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
+        </View>
+
+        <View style={styles.infoCard}>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Email</Text>
+            <Text style={styles.infoValue}>{user.email}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Số điện thoại</Text>
+            <Text style={styles.infoValue}>{user.phone || 'Chưa cập nhật'}</Text>
+          </View>
         </View>
 
         {/* MENU ITEMS */}
@@ -228,6 +239,30 @@ const getStyles = (colors: any) => StyleSheet.create({
   buttonContainer: {
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.lg,
+  },
+  infoCard: {
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    backgroundColor: colors.background,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: SPACING.xs,
+  },
+  infoLabel: {
+    fontSize: FONT_SIZES.sm,
+    color: colors.textLight,
+  },
+  infoValue: {
+    fontSize: FONT_SIZES.md,
+    color: colors.text,
+    fontWeight: FONT_WEIGHTS.semibold,
   },
 });
 

@@ -4,8 +4,8 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { View, TextInput, Text, StyleSheet } from 'react-native';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS } from '../constants';
+import { View, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { COLORS } from '../constants';
 import { InputProps } from '../types';
 
 /**
@@ -36,9 +36,13 @@ const CustomInput: React.FC<InputProps> = ({
   error,
   helperText,
   icon,
+  rightIcon,
+  onRightIconPress,
   disabled = false,
   secureTextEntry = false,
   style,
+  className,
+  inputClassName,
 }: InputProps) => {
   // Track trạng thái focus để thay đổi border color
   const [isFocused, setIsFocused] = useState(false);
@@ -62,46 +66,42 @@ const CustomInput: React.FC<InputProps> = ({
     return COLORS.background;
   };
 
-  const inputContainerStyle = useMemo(
-    () => [
-      styles.inputContainer,
-      {
-        borderColor: getBorderColor(),
-        backgroundColor: getBackgroundColor(),
-        borderWidth: isFocused ? 2 : 1,
-      },
-    ],
-    [disabled, error, isFocused],
-  );
+  const borderClass = useMemo(() => {
+    if (error) return 'border border-error';
+    if (isFocused) return 'border-primary border-2';
+    return 'border border-border';
+  }, [error, isFocused]);
 
-  const inputStyle = useMemo(
-    () => [
-      styles.input,
-      {
-        flex: 1,
-        color: disabled ? COLORS.textLight : COLORS.text,
-      },
-    ],
-    [disabled],
-  );
+  const backgroundClass = disabled ? 'bg-background-dark' : 'bg-background';
+  const textColorClass = disabled ? 'text-text-light' : 'text-text';
+  const containerStyle = {
+    borderColor: getBorderColor(),
+    backgroundColor: getBackgroundColor(),
+    borderWidth: error ? 1 : isFocused ? 1.5 : 1,
+    height: 52,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+  };
 
   return (
-    <View style={[styles.container, style]}>
+    <View className={`my-sm ${className || ''}`} style={[styles.container, style]}>
       {/* Label */}
       {label && (
-        <Text style={styles.label}>{label}</Text>
+        <Text className="text-sm font-semibold text-text mb-xs">{label}</Text>
       )}
 
       {/* Input container */}
       <View
-        style={inputContainerStyle}
+        className={`flex-row items-center rounded-full px-md h-[48px] ${borderClass} ${backgroundClass} ${inputClassName || ''}`}
+        style={[styles.row, containerStyle]}
       >
         {/* Icon trái */}
-        {icon && <View style={styles.leftIcon}>{icon}</View>}
+        {icon && <View className="mr-md">{icon}</View>}
 
         {/* TextInput */}
         <TextInput
-          style={inputStyle}
+          className={`flex-1 text-md ${textColorClass}`}
+          style={styles.input}
           placeholder={placeholder}
           placeholderTextColor={COLORS.textLighter}
           value={value}
@@ -111,57 +111,41 @@ const CustomInput: React.FC<InputProps> = ({
           editable={!disabled}
           secureTextEntry={secureTextEntry}
         />
+
+        {/* Icon phải (ví dụ: toggle password) */}
+        {rightIcon ? (
+          <TouchableOpacity onPress={onRightIconPress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <View className="ml-md">{rightIcon}</View>
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       {/* Error message */}
       {error && (
-        <Text style={styles.errorText}>{error}</Text>
+        <Text className="text-xs text-error mt-xs">{error}</Text>
       )}
 
       {/* Helper text */}
       {helperText && !error && (
-        <Text style={styles.helperText}>{helperText}</Text>
+        <Text className="text-xs text-text-light mt-xs">{helperText}</Text>
       )}
     </View>
   );
 };
 
+export default CustomInput;
+
 const styles = StyleSheet.create({
   container: {
-    marginVertical: SPACING.sm,
+    marginBottom: 12,
   },
-  label: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.semibold as any,
-    color: COLORS.text,
-    marginBottom: SPACING.xs,
-  },
-  inputContainer: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: BORDER_RADIUS.md,
-    paddingHorizontal: SPACING.md,
-    height: 44,
   },
   input: {
-    fontSize: FONT_SIZES.md,
+    flex: 1,
+    fontSize: 16,
     color: COLORS.text,
   },
-  leftIcon: {
-    marginRight: SPACING.md,
-  },
-  errorText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: FONT_WEIGHTS.normal as any,
-    color: COLORS.error,
-    marginTop: SPACING.xs,
-  },
-  helperText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: FONT_WEIGHTS.normal as any,
-    color: COLORS.textLight,
-    marginTop: SPACING.xs,
-  },
 });
-
-export default CustomInput;

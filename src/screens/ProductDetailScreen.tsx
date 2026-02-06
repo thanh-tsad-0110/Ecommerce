@@ -1,30 +1,28 @@
-/**
- * FILE: screens/ProductDetailScreen.tsx
- */
-
 import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
-  SafeAreaView,
   Image,
   FlatList,
   TouchableOpacity,
+  Alert,
+  StyleSheet, 
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS, SHADOWS } from '../constants';
-import { RootStackParamList, CartItem, Product } from '../types';
+
 import CustomButton from '../components/CustomButton';
 import { useCart } from '../state/CartContext';
 import { useFavorites } from '../state/FavoritesContext';
 import { formatPrice } from '../utils/formatting';
 import { findProductById } from '../constants/mockData';
+import { RootStackParamList, CartItem, Product } from '../types';
+import { COLORS } from '../constants';
 
 type ProductDetailProps = NativeStackScreenProps<RootStackParamList, 'ProductDetail'>;
 
-const ProductDetailScreen: React.FC<ProductDetailProps> = ({ route, navigation }) => {
+const ProductDetailScreen: React.FC<ProductDetailProps> = ({ route }) => {
   const { productId } = route.params;
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -93,53 +91,38 @@ const ProductDetailScreen: React.FC<ProductDetailProps> = ({ route, navigation }
       'Chip: Apple M2',
       'Bộ nhớ: 256GB',
       'Trọng lượng: 462g',
-      'Pin: 10 giờ lướt web',
-    ],
-    p7: [
-      'Màn LTPO 2.000 nits',
-      'Cảm biến: ECG, SpO2, nhiệt độ',
       'Pin: 36 giờ',
-      'Chống nước: WR50, IP6X',
       'Sạc nhanh USB‑C',
     ],
-    p8: [
+    p7: [
       'Chip: Apple H2',
       'ANC + Transparency + Adaptive Audio',
       'Pin: 6h (30h với case)',
       'Sạc: USB‑C, MagSafe',
       'Tìm kiếm qua Find My',
     ],
-    p9: [
+    p8: [
       'ANC thế hệ 5',
       'Driver 30mm Carbon',
       'Pin: 30 giờ (ANC)',
-      'Sạc nhanh: 3 phút = 3 giờ',
       'Kết nối: Multipoint, LDAC',
     ],
-    p10: [
+    p9: [
       'Cảm biến Darkfield 8K',
       'Cuộn Magspeed 1.000 dòng/giây',
       'Kết nối: Bolt / Bluetooth',
       'Pin: 70 ngày, sạc USB‑C',
       'Tương thích: 3 thiết bị',
     ],
-    p11: [
+    p10: [
       'Màn OLED 7"',
       'Chế độ Dock/Handheld',
-      'Bộ nhớ: 64GB, hỗ trợ thẻ nhớ',
-      'Pin: 4.5 - 9 giờ',
-      'Cổng: LAN trên dock',
+      'Pin 8h, sạc nhanh 45W',
     ],
-    p12: [
-      'Màn e-ink 6.8" 300ppi',
-      'Đèn nền ấm điều chỉnh',
-      'Pin: Vài tuần',
-      'Chống nước IPX8',
-      'USB‑C, hỗ trợ Audible',
-    ],
+    default: ['Đang cập nhật thông số.'],
   };
 
-  const specs = specsMap[product.id] || ['Đang cập nhật thông số.'];
+  const specs = specsMap[product.id] || specsMap.default;
 
   const handleAddToCart = () => {
     const cartItem: CartItem = {
@@ -151,130 +134,115 @@ const ProductDetailScreen: React.FC<ProductDetailProps> = ({ route, navigation }
       image: product.image,
     };
     addToCart(cartItem);
-    alert(`✓ Đã thêm ${quantity} sản phẩm vào giỏ hàng`);
+    Alert.alert('Giỏ hàng', `✓ Đã thêm ${quantity} sản phẩm vào giỏ hàng`);
   };
 
   const handleToggleFavorite = () => {
     if (isFavorite(product.id)) {
       removeFromFavorites(product.id);
     } else {
-      addToFavorites({ ...product, isFavorite: true });
+      addToFavorites(product);
     }
   };
 
+  const decrease = () => setQuantity((q) => Math.max(1, q - 1));
+  const increase = () => setQuantity((q) => q + 1);
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* IMAGE CAROUSEL */}
-        <View style={styles.imageContainer}>
-          <Image source={{ uri: product.images[selectedImage] }} style={styles.mainImage} />
+    <SafeAreaView style={styles.screen}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <View className="relative w-full h-[320px] bg-background-dark rounded-lg mb-lg overflow-hidden">
+          <Image
+            source={{ uri: product.images[selectedImage] || product.image }}
+            className="w-full h-full"
+            resizeMode="contain"
+          />
           <TouchableOpacity
-            style={styles.favoriteButton}
+            className="absolute top-lg right-lg w-12 h-12 rounded-full bg-background items-center justify-center shadow-md"
             onPress={handleToggleFavorite}
           >
-            <Text style={styles.favoriteIcon}>
-              {isFavorite(product.id) ? '❤️' : '🤍'}
-            </Text>
+            <Text className="text-2xl">{isFavorite(product.id) ? '❤️' : '🤍'}</Text>
           </TouchableOpacity>
         </View>
 
-        {/* IMAGE THUMBNAILS */}
         <FlatList
           data={product.images}
-          renderItem={({ item, index }) => (
-            <TouchableOpacity
-              style={[styles.thumbnail, selectedImage === index && styles.thumbnailActive]}
-              onPress={() => setSelectedImage(index)}
-            >
-              <Image source={{ uri: item }} style={styles.thumbnailImage} />
-            </TouchableOpacity>
-          )}
-          keyExtractor={(_, index) => index.toString()}
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={styles.thumbnailList}
+          keyExtractor={(item: string, idx: number) => `${item}-${idx}`}
+          contentContainerStyle={styles.thumbList}
+          renderItem={({ item, index }: { item: string; index: number }) => (
+            <TouchableOpacity
+              style={[styles.thumb, selectedImage === index && styles.thumbActive]}
+              onPress={() => setSelectedImage(index)}
+            >
+              <Image source={{ uri: item }} style={styles.thumbImage} resizeMode="contain" />
+            </TouchableOpacity>
+          )}
         />
 
-        {/* PRODUCT INFO */}
-        <View style={styles.infoContainer}>
-          <Text style={styles.brand}>{product.brand}</Text>
-          <Text style={styles.name}>{product.name}</Text>
+        <View className="mt-lg">
+          <Text className="text-sm text-text-light mb-xs">{product.brand || 'Thương hiệu'}</Text>
+          <Text className="text-xl font-bold text-text mb-sm">{product.name}</Text>
 
-          {/* RATING */}
-          <View style={styles.ratingContainer}>
-            <Text style={styles.ratingStars}>⭐ {product.rating}</Text>
-            <Text style={styles.reviewsCount}>({product.reviews} đánh giá)</Text>
+          <View className="flex-row items-center mb-md">
+            <Text className="text-md font-semibold">⭐ {product.rating}</Text>
+            <Text className="text-sm text-text-light ml-sm">({product.reviews} đánh giá)</Text>
           </View>
 
-          {/* PRICE */}
-          <View style={styles.priceContainer}>
-            <Text style={styles.price}>{formatPrice(product.price)}</Text>
+          <View className="flex-row items-center mb-md gap-md">
+            <Text className="text-2xl font-bold text-primary">{formatPrice(product.price)}</Text>
             {product.originalPrice && (
-              <Text style={styles.originalPrice}>
+              <Text className="text-md text-text-light line-through">
                 {formatPrice(product.originalPrice)}
               </Text>
             )}
-            {product.discount && (
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>-{product.discount}%</Text>
+            {product.discount ? (
+              <View className="bg-error px-md py-xs rounded-sm">
+                <Text className="text-text-inverse font-bold">-{product.discount}%</Text>
               </View>
-            )}
+            ) : null}
           </View>
 
-          {/* DESCRIPTION */}
-          <Text style={styles.description}>{product.description}</Text>
+          <Text className="text-md text-text mb-lg leading-5">{product.description}</Text>
 
-          {/* SPECS */}
-          <View style={styles.specsContainer}>
-            <Text style={styles.specsTitle}>Thông số kỹ thuật</Text>
-            {specs.map((spec, index) => (
-              <Text key={index} style={styles.specItem}>
-                • {spec}
-              </Text>
-            ))}
+          <View className="mb-lg">
+            <Text className="text-lg font-semibold text-text mb-sm">Thông số kỹ thuật</Text>
+            <View className="bg-background-dark rounded-lg p-md">
+              {specs.map((spec, idx) => (
+                <Text key={idx} className="text-md text-text mb-xs">
+                  • {spec}
+                </Text>
+              ))}
+            </View>
           </View>
 
-          {/* QUANTITY SELECTOR */}
-          <View style={styles.quantityContainer}>
-            <Text style={styles.quantityLabel}>Số lượng:</Text>
-            <View style={styles.quantitySelector}>
+          <View className="flex-row items-center justify-between mb-md">
+            <Text className="text-md font-semibold text-text">Số lượng:</Text>
+            <View className="flex-row items-center gap-md">
               <TouchableOpacity
-                onPress={() => setQuantity(Math.max(1, quantity - 1))}
-                style={styles.quantityButton}
+                className="w-10 h-10 rounded-full bg-background-dark items-center justify-center"
+                onPress={decrease}
               >
-                <Text style={styles.quantityButtonText}>−</Text>
+                <Text className="text-lg text-primary font-bold">−</Text>
               </TouchableOpacity>
-              <Text style={styles.quantityValue}>{quantity}</Text>
+              <Text className="text-md font-semibold text-text">{quantity}</Text>
               <TouchableOpacity
-                onPress={() => setQuantity(quantity + 1)}
-                style={styles.quantityButton}
+                className="w-10 h-10 rounded-full bg-background-dark items-center justify-center"
+                onPress={increase}
               >
-                <Text style={styles.quantityButtonText}>+</Text>
+                <Text className="text-lg text-primary font-bold">+</Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* STOCK STATUS */}
-          <Text style={styles.stock}>
-            📦 Còn hàng: {product.stock} sản phẩm
-          </Text>
-
-          {/* BUTTONS */}
-          <View style={styles.buttonsContainer}>
+          <View className="flex-row gap-md mt-md">
+            <CustomButton title="Thêm vào giỏ" onPress={handleAddToCart} className="flex-1" />
             <CustomButton
-              title="Thêm vào giỏ"
-              onPress={handleAddToCart}
-              variant="primary"
-              size="large"
-            />
-            <CustomButton
-              title="Mua ngay"
-              onPress={() => {
-                handleAddToCart();
-                navigation.navigate('Checkout');
-              }}
+              title={isFavorite(product.id) ? 'Bỏ yêu thích' : 'Yêu thích'}
+              onPress={handleToggleFavorite}
               variant="secondary"
-              size="large"
+              className="flex-1"
             />
           </View>
         </View>
@@ -284,181 +252,34 @@ const ProductDetailScreen: React.FC<ProductDetailProps> = ({ route, navigation }
 };
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  imageContainer: {
-    position: 'relative',
-    width: '100%',
-    height: 300,
-    backgroundColor: COLORS.backgroundDark,
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
   },
-  mainImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
+  thumbList: {
+    paddingVertical: 12,
   },
-  favoriteButton: {
-    position: 'absolute',
-    top: SPACING.lg,
-    right: SPACING.lg,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...SHADOWS.lg,
-  },
-  favoriteIcon: {
-    fontSize: 24,
-  },
-  thumbnailList: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-  },
-  thumbnail: {
+  thumb: {
     width: 70,
     height: 70,
-    marginRight: SPACING.md,
-    borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.backgroundDark,
+    marginRight: 12,
+    borderRadius: 8,
+    backgroundColor: '#F5F5F5',
     borderWidth: 2,
     borderColor: 'transparent',
-    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  thumbnailActive: {
-    borderColor: COLORS.primary,
+  thumbActive: {
+    borderColor: '#FF6B35',
   },
-  thumbnailImage: {
+  thumbImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'contain',
-  },
-  infoContainer: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.lg,
-  },
-  brand: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textLight,
-    marginBottom: SPACING.xs,
-  },
-  name: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  ratingStars: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.semibold,
-  },
-  reviewsCount: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textLight,
-    marginLeft: SPACING.sm,
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-    gap: SPACING.md,
-  },
-  price: {
-    fontSize: FONT_SIZES.xxl,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.primary,
-  },
-  originalPrice: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.textLight,
-    textDecorationLine: 'line-through',
-  },
-  discountBadge: {
-    backgroundColor: COLORS.error,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  discountText: {
-    color: COLORS.textInverse,
-    fontWeight: FONT_WEIGHTS.bold,
-  },
-  description: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text,
-    marginBottom: SPACING.lg,
-    lineHeight: 20,
-  },
-  specsContainer: {
-    marginBottom: SPACING.lg,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
-    backgroundColor: COLORS.backgroundDark,
-    borderRadius: BORDER_RADIUS.md,
-  },
-  specsTitle: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
-  specItem: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  quantityContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
-  },
-  quantityLabel: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.semibold,
-    color: COLORS.text,
-  },
-  quantitySelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-  },
-  quantityButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: COLORS.backgroundDark,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quantityButtonText: {
-    fontSize: FONT_SIZES.lg,
-    color: COLORS.primary,
-    fontWeight: FONT_WEIGHTS.bold,
-  },
-  quantityValue: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.semibold,
-    color: COLORS.text,
-    minWidth: 30,
-    textAlign: 'center',
-  },
-  stock: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.success,
-    marginBottom: SPACING.lg,
-  },
-  buttonsContainer: {
-    gap: SPACING.md,
-    marginBottom: SPACING.lg,
   },
 });
 

@@ -7,17 +7,8 @@
  * - Có state loading, disabled
  */
 
-import React, { useState } from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  View,
-  ActivityIndicator,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS } from '../constants';
+import React, { useMemo, useState } from 'react';
+import { TouchableOpacity, Text, ActivityIndicator, View, StyleSheet } from 'react-native';
 import { ButtonProps } from '../types';
 
 /**
@@ -49,85 +40,90 @@ const CustomButton: React.FC<ButtonProps> = ({
   disabled = false,
   icon,
   style,
+  className,
 }: ButtonProps) => {
   // Sử dụng state để track press animation
   const [isPressed, setIsPressed] = useState(false);
 
-  // Lấy style dựa trên variant
-  const getVariantStyle = (): ViewStyle => {
-    switch (variant) {
-      case 'primary':
-        return {
-          backgroundColor: disabled ? COLORS.disabled : COLORS.primary,
-          borderWidth: 0,
-        };
-      case 'secondary':
-        return {
-          backgroundColor: disabled ? COLORS.disabled : COLORS.secondary,
-          borderWidth: 0,
-        };
-      case 'outline':
-        return {
-          backgroundColor: 'transparent',
-          borderWidth: 2,
-          borderColor: disabled ? COLORS.disabled : COLORS.primary,
-        };
-      default:
-        return {};
-    }
-  };
+  const baseClasses = 'flex-row items-center justify-center rounded-md';
 
-  // Lấy style dựa trên size
-  const getSizeStyle = (): ViewStyle => {
+  const baseStyle = styles.base;
+
+  const sizeClasses = useMemo(() => {
     switch (size) {
       case 'small':
-        return {
-          paddingVertical: SPACING.sm,
-          paddingHorizontal: SPACING.md,
-          minHeight: 32,
-        };
+        return 'py-sm px-md min-h-[32px]';
       case 'large':
-        return {
-          paddingVertical: SPACING.lg,
-          paddingHorizontal: SPACING.xl,
-          minHeight: 52,
-        };
+        return 'py-lg px-xl min-h-[52px]';
       case 'medium':
       default:
-        return {
-          paddingVertical: SPACING.md,
-          paddingHorizontal: SPACING.lg,
-          minHeight: 44,
-        };
+        return 'py-md px-lg min-h-[44px]';
     }
-  };
+  }, [size]);
 
-  // Lấy style chữ dựa trên size
-  const getTextSizeStyle = (): TextStyle => {
-    switch (size) {
-      case 'small':
-        return {
-          fontSize: FONT_SIZES.sm,
-        };
-      case 'large':
-        return {
-          fontSize: FONT_SIZES.lg,
-        };
-      case 'medium':
-      default:
-        return {
-          fontSize: FONT_SIZES.md,
-        };
-    }
-  };
-
-  // Xác định màu text
-  const getTextColor = (): string => {
+  const variantClasses = useMemo(() => {
     if (disabled) {
-      return COLORS.textLight;
+      return 'bg-disabled border-disabled';
     }
-    return variant === 'outline' ? COLORS.primary : COLORS.textInverse;
-  };
+    switch (variant) {
+      case 'secondary':
+        return 'bg-secondary';
+      case 'outline':
+        return 'bg-transparent border-2 border-primary';
+      case 'primary':
+      default:
+        return 'bg-primary';
+    }
+  }, [variant, disabled]);
+
+  const textColorClass = useMemo(() => {
+    if (disabled) return 'text-text-light';
+    return variant === 'outline' ? 'text-primary' : 'text-text-inverse';
+  }, [variant, disabled]);
+
+  const sizeStyle = useMemo(() => {
+    switch (size) {
+      case 'small':
+        return { paddingVertical: 8, paddingHorizontal: 12, minHeight: 32, borderRadius: 999 };
+      case 'large':
+        return { paddingVertical: 14, paddingHorizontal: 20, minHeight: 52, borderRadius: 999 };
+      case 'medium':
+      default:
+        return { paddingVertical: 12, paddingHorizontal: 16, minHeight: 44, borderRadius: 999 };
+    }
+  }, [size]);
+
+  const variantStyle = useMemo(() => {
+    if (disabled) {
+      return { backgroundColor: '#CCCCCC', borderColor: '#CCCCCC', borderWidth: 1 };
+    }
+    switch (variant) {
+      case 'secondary':
+        return { backgroundColor: '#004E89', borderColor: '#004E89', borderWidth: 1 };
+      case 'outline':
+        return { backgroundColor: 'transparent', borderColor: '#FF6B35', borderWidth: 2 };
+      case 'primary':
+      default:
+        return { backgroundColor: '#FF6B35', borderColor: '#FF6B35', borderWidth: 1 };
+    }
+  }, [variant, disabled]);
+
+  const textStyle = useMemo(() => {
+    if (disabled) return { color: '#888888' };
+    return variant === 'outline' ? { color: '#FF6B35' } : { color: '#FFFFFF' };
+  }, [variant, disabled]);
+
+  const textSizeClass = useMemo(() => {
+    switch (size) {
+      case 'small':
+        return 'text-sm';
+      case 'large':
+        return 'text-lg';
+      case 'medium':
+      default:
+        return 'text-md';
+    }
+  }, [size]);
 
   return (
     <TouchableOpacity
@@ -140,55 +136,32 @@ const CustomButton: React.FC<ButtonProps> = ({
       }}
       disabled={disabled || loading}
       activeOpacity={0.7}
+      className={`${baseClasses} ${sizeClasses} ${variantClasses} ${className || ''}`}
+      style={[baseStyle, sizeStyle, variantStyle, { opacity: isPressed ? 0.8 : 1 }, style]}
     >
-      <View
-        style={[
-          styles.button,
-          getVariantStyle(),
-          getSizeStyle(),
-          {
-            opacity: isPressed ? 0.8 : 1,
-          },
-          style,
-        ]}
-      >
-        {loading ? (
-          <ActivityIndicator color={getTextColor()} size="small" />
-        ) : (
-          <>
-            {icon && <View style={styles.iconContainer}>{icon}</View>}
-            <Text
-              style={[
-                styles.text,
-                getTextSizeStyle(),
-                {
-                  color: getTextColor(),
-                },
-              ]}
-            >
-              {title}
-            </Text>
-          </>
-        )}
-      </View>
+      {loading ? (
+        <ActivityIndicator color={variant === 'outline' ? '#FF6B35' : '#FFFFFF'} size="small" />
+      ) : (
+        <>
+          {icon && <View className="mr-sm">{icon}</View>}
+          <Text
+            className={`font-semibold text-center ${textSizeClass} ${textColorClass}`}
+            style={textStyle}
+          >
+            {title}
+          </Text>
+        </>
+      )}
     </TouchableOpacity>
   );
 };
 
+export default CustomButton;
+
 const styles = StyleSheet.create({
-  button: {
-    borderRadius: BORDER_RADIUS.md,
-    justifyContent: 'center',
-    alignItems: 'center',
+  base: {
     flexDirection: 'row',
-  },
-  text: {
-    fontWeight: FONT_WEIGHTS.semibold as any,
-    textAlign: 'center',
-  },
-  iconContainer: {
-    marginRight: SPACING.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
-
-export default CustomButton;

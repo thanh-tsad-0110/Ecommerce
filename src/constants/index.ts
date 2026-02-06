@@ -11,9 +11,9 @@
 // ============================================================
 export const COLORS = {
   // Primary colors (Màu chính)
-  primary: '#FF6B35',        // Màu cam (action, button)
-  primaryLight: '#FFB399',   // Cam nhạt
-  primaryDark: '#D64423',    // Cam đậm
+  primary: '#E53935',        // Đỏ chủ đạo (action, button)
+  primaryLight: '#FF8A80',   // Đỏ nhạt
+  primaryDark: '#C62828',    // Đỏ đậm
   
   // Secondary colors (Màu phụ)
   secondary: '#004E89',      // Xanh đậm

@@ -2,6 +2,7 @@
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
     "types": ["jest"],
+    "lib": ["esnext", "dom"],
     "baseUrl": ".",
     "paths": {
       "react-native": ["./node_modules/react-native/types"],

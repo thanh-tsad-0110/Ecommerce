@@ -22,9 +22,11 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
+import { CompositeScreenProps } from '@react-navigation/native';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS, SHADOWS } from '../constants';
-import { RootStackParamList, Product, Category } from '../types';
+import { RootStackParamList, BottomTabParamList, Product, Category } from '../types';
 import { mockProducts, mockCategories, mockBanners } from '../constants/mockData';
 import ProductCard from '../components/ProductCard';
 import CustomButton from '../components/CustomButton';
@@ -307,6 +309,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         }
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.heroStrip}>
+          <View style={styles.heroGlowOne} />
+          <View style={styles.heroGlowTwo} />
+          <View style={styles.heroContent}>
+            <View>
+              <Text style={styles.heroKicker}>Công nghệ hôm nay</Text>
+              <Text style={styles.heroTitle}>Khám phá deal mới</Text>
+              <Text style={styles.heroSub}>Ưu đãi dành riêng cho bạn • Giao nhanh</Text>
+            </View>
+            <TouchableOpacity style={styles.heroCta} onPress={() => Alert.alert('Khám phá', 'Xem ưu đãi hôm nay')}>
+              <Text style={styles.heroCtaText}>Xem ưu đãi</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* BANNER CAROUSEL */}
         {renderBannerCarousel()}
 
@@ -320,7 +337,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           {renderProductsSection(
             '⚡ Flash Sale',
             flashSaleProducts,
-            () => alert('Xem thêm flash sale')
+            () => Alert.alert('Thông báo', 'Xem thêm flash sale')
           )}
         </View>
 
@@ -329,7 +346,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           {renderProductsSection(
             '⭐ Sản Phẩm Nổi Bật',
             featuredProducts,
-            () => alert('Xem thêm sản phẩm nổi bật')
+            () => Alert.alert('Thông báo', 'Xem thêm sản phẩm nổi bật')
           )}
         </View>
 
@@ -338,7 +355,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           {renderProductsSection(
             '🆕 Hàng Mới Về',
             newArrivals,
-            () => alert('Xem thêm hàng mới')
+            () => Alert.alert('Thông báo', 'Xem thêm hàng mới')
           )}
         </View>
 
@@ -385,6 +402,77 @@ const getStyles = (colors: any) => StyleSheet.create({
     marginTop: SPACING.md,
     fontSize: FONT_SIZES.md,
     color: colors.textLight,
+  },
+
+  // HERO STRIP
+  heroStrip: {
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.md,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    backgroundColor: '#E0F2FE',
+    overflow: 'hidden',
+  },
+  heroGlowOne: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: '#A5B4FC',
+    opacity: 0.35,
+    top: -80,
+    right: -60,
+  },
+  heroGlowTwo: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: '#6EE7B7',
+    opacity: 0.25,
+    bottom: -60,
+    left: -50,
+  },
+  heroContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  heroKicker: {
+    fontSize: FONT_SIZES.sm,
+    color: '#1D4ED8',
+    fontWeight: FONT_WEIGHTS.semibold,
+    letterSpacing: 0.2,
+  },
+  heroTitle: {
+    fontSize: FONT_SIZES.xl,
+    color: '#0F172A',
+    fontWeight: FONT_WEIGHTS.bold,
+    marginTop: 4,
+  },
+  heroSub: {
+    fontSize: FONT_SIZES.sm,
+    color: '#4B5563',
+    marginTop: 4,
+  },
+  heroCta: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    backgroundColor: '#2563EB',
+    shadowColor: '#2563EB',
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  heroCtaText: {
+    color: '#FFFFFF',
+    fontWeight: FONT_WEIGHTS.bold,
+    fontSize: FONT_SIZES.sm,
+    letterSpacing: 0.3,
   },
 
   // BANNER

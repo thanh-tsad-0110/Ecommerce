@@ -4,16 +4,9 @@
  */
 
 import React from 'react';
-import {
-  View,
-  Image,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
+import { View, Image, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { SPACING } from '../constants';
 import { Product } from '../types';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS, SHADOWS } from '../constants';
 import CustomButton from './CustomButton';
 
 interface ProductCardProps {
@@ -56,9 +49,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   const renderStars = (rating: number) => {
     return (
-      <View style={styles.ratingContainer}>
-        <Text style={styles.ratingText}>{'⭐'.repeat(Math.floor(rating))}</Text>
-        <Text style={styles.reviewsText}>({product.reviews})</Text>
+      <View className="flex-row items-center my-xs">
+        <Text className="mr-xs">{'⭐'.repeat(Math.floor(rating))}</Text>
+        <Text className="text-xs text-text-light">({product.reviews})</Text>
       </View>
     );
   };
@@ -67,41 +60,42 @@ const ProductCard: React.FC<ProductCardProps> = ({
     // List view variant
     return (
       <TouchableOpacity
-        style={styles.listContainer}
+        className="flex-row px-lg py-md border-b border-border items-center relative"
         onPress={onPress}
         activeOpacity={0.7}
       >
         {/* Hình ảnh */}
         <Image
           source={{ uri: product.image }}
-          style={[styles.image, { width: imageWidth, height: imageHeight }]}
+          style={{ width: imageWidth, height: imageHeight }}
+          className="rounded-md bg-background-dark"
         />
 
         {/* Thông tin */}
-        <View style={styles.listInfo}>
-          <Text style={styles.name} numberOfLines={2}>
+        <View className="flex-1 ml-md">
+          <Text className="text-md font-semibold text-text mb-xs" numberOfLines={2}>
             {product.name}
           </Text>
 
           {renderStars(product.rating)}
 
-          <View style={styles.priceContainer}>
-            <Text style={styles.price}>
+          <View className="flex-row items-center my-md">
+            <Text className="text-md font-bold text-primary">
               {discountedPrice.toLocaleString('vi-VN')}đ
             </Text>
             {product.originalPrice && (
-              <Text style={styles.originalPrice}>
+              <Text className="text-sm text-text-light line-through ml-sm">
                 {product.originalPrice.toLocaleString('vi-VN')}đ
               </Text>
             )}
           </View>
 
           <TouchableOpacity
-            style={styles.favoriteButton}
+            className="absolute top-md right-lg p-sm"
             onPress={onToggleFavorite}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Text style={styles.favoriteIcon}>{product.isFavorite ? '❤️' : '🤍'}</Text>
+            <Text className="text-lg">{product.isFavorite ? '❤️' : '🤍'}</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
@@ -111,51 +105,52 @@ const ProductCard: React.FC<ProductCardProps> = ({
   // Grid view variant (mặc định)
   return (
     <TouchableOpacity
-      style={styles.gridContainer}
+      className="flex-[0.5] mx-sm my-md rounded-lg overflow-hidden bg-background"
       onPress={onPress}
       activeOpacity={0.7}
     >
       {/* Container hình ảnh */}
-      <View style={styles.imageWrapper}>
+      <View className="relative w-full aspect-square">
         {/* Hình ảnh */}
         <Image
           source={{ uri: product.image }}
-          style={[styles.image, { width: imageWidth, height: imageHeight }]}
+          style={{ width: imageWidth, height: imageHeight }}
+          className="w-full h-full bg-background-dark"
         />
 
         {/* Badges (discount, new, sale) */}
         {product.discount ? (
-          <View style={styles.discountBadge}>
-            <Text style={styles.badgeText}>-{product.discount}%</Text>
+          <View className="absolute top-sm left-sm bg-error px-sm py-xs rounded-sm">
+            <Text className="text-text-inverse text-xs font-bold">-{product.discount}%</Text>
           </View>
         ) : null}
 
         {product.isNew && (
-          <View style={[styles.badge, styles.newBadge]}>
-            <Text style={styles.badgeText}>Mới</Text>
+          <View className="absolute top-sm right-sm px-sm py-xs rounded-sm bg-primary">
+            <Text className="text-text-inverse text-xs font-bold">Mới</Text>
           </View>
         )}
 
         {product.isFlashSale && (
-          <View style={[styles.badge, styles.flashSaleBadge]}>
-            <Text style={styles.badgeText}>⚡</Text>
+          <View className="absolute top-sm right-sm mt-[24px] px-sm py-xs rounded-sm bg-warning">
+            <Text className="text-text-inverse text-xs font-bold">⚡</Text>
           </View>
         )}
 
         {/* Favorite button */}
         <TouchableOpacity
-          style={styles.favoriteCircle}
+          className="absolute bottom-md right-md w-9 h-9 rounded-full bg-background justify-center items-center"
           onPress={onToggleFavorite}
         >
-          <Text style={styles.favoriteIcon}>
+          <Text className="text-lg">
             {product.isFavorite ? '❤️' : '🤍'}
           </Text>
         </TouchableOpacity>
       </View>
 
       {/* Thông tin sản phẩm */}
-      <View style={styles.info}>
-        <Text style={styles.name} numberOfLines={2}>
+      <View className="p-md">
+        <Text className="text-sm font-semibold text-text mb-xs" numberOfLines={2}>
           {product.name}
         </Text>
 
@@ -163,12 +158,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {renderStars(product.rating)}
 
         {/* Giá */}
-        <View style={styles.priceContainer}>
-          <Text style={styles.price}>
+        <View className="flex-row items-center my-md">
+          <Text className="text-md font-bold text-primary">
             {discountedPrice.toLocaleString('vi-VN')}đ
           </Text>
           {product.originalPrice && (
-            <Text style={styles.originalPrice}>
+            <Text className="text-sm text-text-light line-through ml-sm">
               {product.originalPrice.toLocaleString('vi-VN')}đ
             </Text>
           )}
@@ -180,136 +175,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
           onPress={onAddToCart || (() => {})}
           variant="primary"
           size="small"
-          style={{ marginTop: SPACING.sm }}
+          className="mt-sm"
         />
       </View>
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  // Grid variant
-  gridContainer: {
-    flex: 0.5,
-    marginHorizontal: SPACING.sm,
-    marginVertical: SPACING.md,
-    borderRadius: BORDER_RADIUS.lg,
-    overflow: 'hidden',
-    backgroundColor: COLORS.background,
-    ...SHADOWS.md,
-  },
-  imageWrapper: {
-    position: 'relative',
-    width: '100%',
-    aspectRatio: 1,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-    backgroundColor: COLORS.backgroundDark,
-  },
-  discountBadge: {
-    position: 'absolute',
-    top: SPACING.sm,
-    left: SPACING.sm,
-    backgroundColor: COLORS.error,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  badge: {
-    position: 'absolute',
-    top: SPACING.sm,
-    right: SPACING.sm,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  newBadge: {
-    backgroundColor: COLORS.primary,
-  },
-  flashSaleBadge: {
-    backgroundColor: COLORS.warning,
-  },
-  badgeText: {
-    color: COLORS.textInverse,
-    fontSize: FONT_SIZES.xs,
-    fontWeight: FONT_WEIGHTS.bold as any,
-  },
-  favoriteCircle: {
-    position: 'absolute',
-    bottom: SPACING.md,
-    right: SPACING.md,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...SHADOWS.md,
-  },
-  favoriteIcon: {
-    fontSize: 18,
-  },
-  info: {
-    padding: SPACING.md,
-  },
-  name: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.semibold as any,
-    color: COLORS.text,
-    marginBottom: SPACING.xs,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: SPACING.xs,
-  },
-  ratingText: {
-    marginRight: SPACING.xs,
-  },
-  reviewsText: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.textLight,
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: SPACING.md,
-  },
-  price: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.bold as any,
-    color: COLORS.primary,
-  },
-  originalPrice: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textLight,
-    marginLeft: SPACING.sm,
-    textDecorationLine: 'line-through',
-  },
-
-  // List variant
-  listContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    alignItems: 'center',
-    position: 'relative',
-  },
-  listInfo: {
-    flex: 1,
-    marginLeft: SPACING.md,
-  },
-  favoriteButton: {
-    position: 'absolute',
-    top: SPACING.md,
-    right: SPACING.lg,
-    padding: SPACING.sm,
-  },
-});
-
 export default ProductCard;

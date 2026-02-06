@@ -1,432 +1,405 @@
-/**
- * FILE: screens/LoginScreen.tsx
- * GIẢI THÍCH:
- * - Màn hình đăng nhập cho người dùng
- * - Có form nhập email và password
- * - Có nút đăng ký và quên mật khẩu
- */
-
 import React, { useState } from 'react';
 import {
     View,
     Text,
-    StyleSheet,
     TouchableOpacity,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
     Alert,
+    ToastAndroid,
     ActivityIndicator,
+    SafeAreaView,
+    StyleSheet,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS } from '../constants';
-import { RootStackParamList } from '../types';
-import { useUser } from '../state/UserContext';
-import { useTheme } from '../state/ThemeContext';
-import CustomButton from '../components/CustomButton';
+
 import CustomInput from '../components/CustomInput';
+import { RootStackParamList, User } from '../types';
+import { useUser } from '../state/UserContext';
 
 type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
-    // ============================================================
-    // STATE
-    // ============================================================
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
     const { loginSuccess } = useUser();
-    const { colors } = useTheme();
 
-    // ============================================================
-    // FUNCTIONS
-    // ============================================================
+    const isPasswordStrong = (pwd: string) =>
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(pwd);
 
-    /**
-     * handleLogin: Xử lý đăng nhập
-     */
-    const handleLogin = async () => {
-        // Validate input - CHỈ CẦN NHẬP BẤT KỲ EMAIL VÀ PASSWORD NÀO
-        if (!email || !password) {
-            Alert.alert('Lỗi', 'Vui lòng nhập email và mật khẩu');
-            return;
+    const notify = (title: string, message: string) => {
+        if (Platform.OS === 'android') {
+            ToastAndroid.show(`${title}: ${message}`, ToastAndroid.SHORT);
         }
-
-        // Kiểm tra password có ít nhất 1 ký tự
-        if (password.length < 1) {
-            Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 1 ký tự');
-            return;
-        }
-
-        try {
-            setIsLoading(true);
-
-            // Giả lập API call (1 giây)
-            await new Promise<void>((resolve) => setTimeout(() => resolve(), 1000));
-
-            // Mock login - CHẤP NHẬN BẤT KỲ EMAIL/PASSWORD NÀO
-            // Ví dụ: email: "test@gmail.com", password: "123"
-            const mockUser = {
-                id: '1',
-                email: email,
-                name: 'Nguyễn Văn A',
-                phone: '0123456789',
-                avatar: 'https://picsum.photos/100/100?random=999',
-                addresses: [],
-                paymentMethods: [],
-                preferences: {
-                    darkMode: false,
-                    notifications: true,
-                    language: 'vi',
-                    currency: 'VND',
-                },
-                createdAt: new Date().toISOString(),
-                lastLogin: new Date().toISOString(),
-            };
-
-            // Lưu user vào context
-            loginSuccess(mockUser);
-
-            Alert.alert('Thành công', 'Đăng nhập thành công!', [
-                {
-                    text: 'OK',
-                    onPress: () => {
-                        // Navigate to main app
-                        navigation.reset({
-                            index: 0,
-                            routes: [{ name: 'MainTabs' }],
-                        });
-                    },
-                },
-            ]);
-        } catch (error) {
-            console.error('Login error', error);
-            Alert.alert('Lỗi', 'Đăng nhập thất bại. Vui lòng thử lại.');
-        } finally {
-            setIsLoading(false);
-        }
+        Alert.alert(title, message);
     };
 
-    /**
-     * handleRegister: Chuyển đến màn hình đăng ký
-     */
+    const buildDemoUser = (): User => ({
+        id: 'demo-user',
+        name: 'Demo User',
+        email,
+        phone: '0000000000',
+        avatar: undefined,
+        addresses: [],
+        paymentMethods: [],
+        preferences: {
+            darkMode: false,
+            notifications: true,
+            language: 'vi',
+            currency: 'VND',
+        },
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+    });
+
+    const validate = () => {
+        const next: { email?: string; password?: string } = {};
+        if (!email.trim()) next.email = 'Vui lòng nhập email';
+        else if (!email.includes('@')) next.email = 'Email chưa đúng định dạng';
+        if (!password.trim()) next.password = 'Mật khẩu không được để trống';
+        else if (!isPasswordStrong(password)) next.password = 'Mật khẩu phải >=8 ký tự, gồm chữ thường, chữ hoa, số và ký tự đặc biệt';
+        setErrors(next);
+        const message = next.email || next.password;
+        return { valid: Object.keys(next).length === 0, message };
+    };
+
     const handleRegister = () => {
         navigation.navigate('Register');
     };
 
-    /**
-     * handleGoogleLogin: Giả lập đăng nhập bằng Google (mock)
-     * Lưu user vào context và chuyển sang MainTabs
-     */
-    const handleGoogleLogin = async () => {
+    const handleLogin = async () => {
+        const { valid, message } = validate();
+        if (!valid) {
+            if (message) notify('Thiếu thông tin', message);
+            return;
+        }
+
         try {
             setIsLoading(true);
-            await new Promise<void>((resolve) => setTimeout(() => resolve(), 600));
+            await new Promise((resolve) => setTimeout(resolve, 300));
 
-            const googleUser = {
-                id: `google-${Date.now()}`,
-                email: 'user.google@example.com',
-                name: 'Google User',
-                phone: '',
-                avatar: 'https://picsum.photos/100/100?random=321',
-                addresses: [],
-                paymentMethods: [],
-                preferences: {
-                    darkMode: false,
-                    notifications: true,
-                    language: 'vi',
-                    currency: 'VND',
-                },
-                createdAt: new Date().toISOString(),
-                lastLogin: new Date().toISOString(),
-            };
+            const isDemoUser =
+                email.trim().toLowerCase() === 'pro8shat@gmail.com' && password === 'Tuanthanhpro8@';
 
-            loginSuccess(googleUser);
-            navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
+            if (isDemoUser) {
+                loginSuccess(buildDemoUser());
+                navigation.navigate('MainTabs');
+                return;
+            }
+
+            notify('Sai thông tin', 'Email hoặc mật khẩu chưa đúng. Vui lòng đăng ký nếu bạn chưa có tài khoản.');
         } catch (error) {
-            console.error('Google login error', error);
-            Alert.alert('Lỗi', 'Đăng nhập Google thất bại. Vui lòng thử lại.');
+            notify('Lỗi', 'Không thể đăng nhập. Vui lòng thử lại.');
         } finally {
             setIsLoading(false);
         }
     };
 
-    /**
-     * handleForgotPassword: Quên mật khẩu
-     */
     const handleForgotPassword = () => {
-        Alert.alert('Quên mật khẩu', 'Chức năng quên mật khẩu - TODO');
+        notify('Quên mật khẩu', 'Tính năng đang được phát triển.');
     };
 
-    // ============================================================
-    // RENDER
-    // ============================================================
-
-    const styles = getStyles(colors);
+    const handleSocialComingSoon = (provider: string) => {
+        notify(provider, 'Tính năng đang được thiết lập. Vui lòng đăng ký hoặc dùng tài khoản demo.');
+    };
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-            <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
+        <SafeAreaView style={styles.screen}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={styles.flex}
             >
-                {/* LOGO / HEADER */}
-                <View style={styles.header}>
-                    <Text style={styles.logo}>🛍️</Text>
-                    <Text style={styles.title}>ECOMMERCE APP</Text>
-                    <Text style={styles.subtitle}>Đăng nhập để tiếp tục</Text>
-
-                    {/* HƯỚNG DẪN ĐĂNG NHẬP */}
-                    <View style={styles.demoHint}>
-                        <Text style={styles.demoHintTitle}>💡 Demo - Nhập bất kỳ:</Text>
-                        <Text style={styles.demoHintText}>Email: test@gmail.com</Text>
-                        <Text style={styles.demoHintText}>Password: 123</Text>
+                <ScrollView
+                    contentContainerStyle={styles.scroll}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <View style={styles.hero}>
+                        <View style={styles.heroCard}>
+                            <View style={[styles.blob, styles.blobBlue]} />
+                            <View style={[styles.blob, styles.blobIndigo]} />
+                            <View style={[styles.blob, styles.blobTeal]} />
+                            <View style={styles.logoBox}>
+                                <Text style={styles.logoEmoji}>💻</Text>
+                            </View>
+                        </View>
+                        <Text style={styles.brand}>TECHNOLOGY STORE</Text>
+                        <Text style={styles.tagline}>Smart tech for smart life</Text>
+                        <View style={styles.heroBadge}>
+                            <Text style={styles.heroBadgeText}>New drops weekly • Ưu đãi thành viên</Text>
+                        </View>
                     </View>
-                </View>
 
-                {/* FORM */}
-                <View style={styles.form}>
-                    {/* EMAIL INPUT */}
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Email</Text>
+                    <View style={styles.card}>
+                        <Text style={styles.title}>Sign In</Text>
+
                         <CustomInput
-                            placeholder="Nhập email của bạn"
+                            placeholder="ban@example.com"
                             value={email}
-                            onChangeText={setEmail}
+                            onChangeText={(v) => {
+                                setEmail(v);
+                                if (errors.email) setErrors((e) => ({ ...e, email: undefined }));
+                            }}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            inputClassName="bg-white border-[#E5E7EB]"
                         />
-                    </View>
+                        {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
 
-                    {/* PASSWORD INPUT */}
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Mật khẩu</Text>
                         <CustomInput
                             placeholder="Nhập mật khẩu"
                             value={password}
-                            onChangeText={setPassword}
+                            onChangeText={(v) => {
+                                setPassword(v);
+                                if (errors.password) setErrors((e) => ({ ...e, password: undefined }));
+                            }}
                             secureTextEntry={!showPassword}
+                            inputClassName="bg-white border-[#E5E7EB] mt-3"
                         />
+                        {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
+
+                        <View style={styles.rowBetween}>
+                            <TouchableOpacity onPress={() => setShowPassword((prev) => !prev)}>
+                                <Text style={styles.link}>{showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={handleForgotPassword}>
+                                <Text style={styles.link}>Quên mật khẩu?</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <TouchableOpacity
+                            onPress={handleLogin}
+                            disabled={isLoading}
+                            activeOpacity={0.9}
+                            style={[styles.primaryBtn, isLoading && styles.disabled]}
+                        >
+                            {isLoading ? (
+                                <ActivityIndicator color="#FFFFFF" />
+                            ) : (
+                                <Text style={styles.primaryText}>SIGN IN</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        <View style={styles.dividerWrap}>
+                            <View style={styles.divider} />
+                            <Text style={styles.dividerText}>Hoặc</Text>
+                            <View style={styles.divider} />
+                        </View>
+
+                        <View style={styles.socialColumn}>
+                            <TouchableOpacity style={[styles.socialBtn, styles.socialOrange]} onPress={() => handleSocialComingSoon('Google')}>
+                                <Text style={styles.socialTextRed}>GOOGLE</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.socialBtn, styles.socialOrange]} onPress={() => handleSocialComingSoon('Facebook')}>
+                                <Text style={styles.socialTextRed}>FACEBOOK</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.socialBtn, styles.socialOrange]} onPress={() => handleSocialComingSoon('Apple')}>
+                                <Text style={styles.socialTextRed}>APPLE</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.footerRow}>
+                            <Text style={styles.footerText}>Chưa có tài khoản?</Text>
+                            <TouchableOpacity onPress={handleRegister}>
+                                <Text style={styles.link}> Đăng ký</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-
-                    {/* SHOW PASSWORD TOGGLE */}
-                    <TouchableOpacity
-                        style={styles.showPasswordContainer}
-                        onPress={() => setShowPassword(!showPassword)}
-                    >
-                        <Text style={styles.showPasswordText}>
-                            {showPassword ? '🙈 Ẩn mật khẩu' : '👁️ Hiện mật khẩu'}
-                        </Text>
-                    </TouchableOpacity>
-
-                    {/* FORGOT PASSWORD */}
-                    <TouchableOpacity
-                        style={styles.forgotPasswordContainer}
-                        onPress={handleForgotPassword}
-                    >
-                        <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
-                    </TouchableOpacity>
-
-                    {/* LOGIN BUTTON */}
-                    <CustomButton
-                        title={isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
-                        onPress={handleLogin}
-                        disabled={isLoading}
-                        variant="primary"
-                        style={styles.loginButton}
-                    />
-
-                    <CustomButton
-                        title={isLoading ? 'Đang xử lý...' : 'Đăng nhập với Google'}
-                        onPress={handleGoogleLogin}
-                        disabled={isLoading}
-                        variant="secondary"
-                        style={styles.googleButton}
-                        icon={<Text style={{ fontSize: 16 }}>🟢</Text>}
-                    />
-
-                    {isLoading && (
-                        <ActivityIndicator
-                            size="small"
-                            color={colors.primary}
-                            style={styles.loader}
-                        />
-                    )}
-
-                    {/* DIVIDER */}
-                    <View style={styles.divider}>
-                        <View style={styles.dividerLine} />
-                        <Text style={styles.dividerText}>HOẶC</Text>
-                        <View style={styles.dividerLine} />
-                    </View>
-
-                    {/* REGISTER BUTTON */}
-                    <CustomButton
-                        title="Tạo tài khoản mới"
-                        onPress={handleRegister}
-                        variant="secondary"
-                        style={styles.registerButton}
-                    />
-                </View>
-
-                {/* FOOTER */}
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>
-                        Bằng cách đăng nhập, bạn đồng ý với{' '}
-                    </Text>
-                    <TouchableOpacity>
-                        <Text style={styles.footerLink}>Điều khoản dịch vụ</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.footerText}> và </Text>
-                    <TouchableOpacity>
-                        <Text style={styles.footerLink}>Chính sách bảo mật</Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-        </KeyboardAvoidingView>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 };
 
-const getStyles = (colors: any) => StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.background,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        padding: SPACING.xl,
-    },
+export default LoginScreen;
 
-    // HEADER
-    header: {
-        alignItems: 'center',
-        marginBottom: SPACING.xxxl,
+const styles = StyleSheet.create({
+    screen: {
+        flex: 1,
+        backgroundColor: '#F3F4F6',
     },
-    logo: {
-        fontSize: 64,
-        marginBottom: SPACING.md,
+    flex: { flex: 1 },
+    scroll: {
+        padding: 20,
+        paddingTop: 40,
+    },
+    hero: {
+        alignItems: 'center',
+        marginBottom: 24,
+        gap: 6,
+    },
+    heroCard: {
+        width: 132,
+        height: 132,
+        borderRadius: 32,
+        backgroundColor: '#E0F2FE',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        shadowColor: '#60A5FA',
+        shadowOpacity: 0.25,
+        shadowOffset: { width: 0, height: 12 },
+        shadowRadius: 18,
+        elevation: 8,
+    },
+    blob: {
+        position: 'absolute',
+        width: 160,
+        height: 160,
+        borderRadius: 80,
+        opacity: 0.25,
+    },
+    blobBlue: {
+        backgroundColor: '#60A5FA',
+        top: -40,
+        right: -30,
+    },
+    blobIndigo: {
+        backgroundColor: '#A5B4FC',
+        bottom: -50,
+        left: -20,
+    },
+    blobTeal: {
+        backgroundColor: '#6EE7B7',
+        top: 10,
+        left: 20,
+    },
+    logoBox: {
+        width: 68,
+        height: 68,
+        borderRadius: 16,
+        backgroundColor: '#E0F2FE',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#2563EB',
+        shadowOpacity: 0.15,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 16,
+        elevation: 5,
+    },
+    logoEmoji: { fontSize: 30 },
+    brand: {
+        fontSize: 20,
+        fontWeight: '800',
+        color: '#0F172A',
+        letterSpacing: 1,
+        fontFamily: Platform.select({ ios: 'AvenirNext-Bold', android: 'sans-serif-medium', default: 'System' }),
+    },
+    tagline: {
+        fontSize: 14,
+        color: '#4B5563',
+        textAlign: 'center',
+        fontFamily: Platform.select({ ios: 'AvenirNext-Regular', android: 'sans-serif', default: 'System' }),
+    },
+    heroBadge: {
+        marginTop: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 999,
+        backgroundColor: '#E0F2FE',
+        borderWidth: 1,
+        borderColor: '#BFDBFE',
+    },
+    heroBadgeText: {
+        fontSize: 12,
+        color: '#1D4ED8',
+        fontWeight: '700',
+        letterSpacing: 0.3,
+        fontFamily: Platform.select({ ios: 'AvenirNext-DemiBold', android: 'sans-serif-medium', default: 'System' }),
+    },
+    card: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 28,
+        padding: 20,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        shadowColor: '#000',
+        shadowOpacity: 0.08,
+        shadowOffset: { width: 0, height: 10 },
+        shadowRadius: 24,
+        elevation: 5,
     },
     title: {
-        fontSize: FONT_SIZES.xxxl,
-        fontWeight: FONT_WEIGHTS.bold,
-        color: colors.text,
-        marginBottom: SPACING.xs,
+        fontSize: 24,
+        fontWeight: '700',
+        color: '#0F172A',
+        textAlign: 'center',
+        marginBottom: 18,
+        fontFamily: Platform.select({ ios: 'AvenirNext-DemiBold', android: 'sans-serif-medium', default: 'System' }),
     },
-    subtitle: {
-        fontSize: FONT_SIZES.md,
-        color: colors.textLight,
+    rowBetween: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 10,
+        marginBottom: 16,
     },
-
-    // DEMO HINT
-    demoHint: {
-        marginTop: SPACING.lg,
-        padding: SPACING.md,
-        backgroundColor: colors.primaryLight,
-        borderRadius: BORDER_RADIUS.md,
-        borderWidth: 1,
-        borderColor: colors.primary,
+    link: {
+        color: '#2563EB',
+        fontSize: 13,
+        fontWeight: '600',
     },
-    demoHintTitle: {
-        fontSize: FONT_SIZES.sm,
-        fontWeight: FONT_WEIGHTS.bold,
-        color: colors.primary,
-        marginBottom: SPACING.xs,
+    primaryBtn: {
+        height: 54,
+        borderRadius: 999,
+        backgroundColor: '#2563EB',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#2563EB',
+        shadowOpacity: 0.22,
+        shadowOffset: { width: 0, height: 12 },
+        shadowRadius: 24,
+        elevation: 6,
     },
-    demoHintText: {
-        fontSize: FONT_SIZES.xs,
-        color: colors.text,
-        marginLeft: SPACING.sm,
+    primaryText: {
+        color: '#FFFFFF',
+        fontWeight: '700',
+        fontSize: 15,
+        letterSpacing: 0.4,
+        fontFamily: Platform.select({ ios: 'AvenirNext-DemiBold', android: 'sans-serif-medium', default: 'System' }),
     },
-
-    // FORM
-    form: {
-        width: '100%',
-    },
-    inputContainer: {
-        marginBottom: SPACING.lg,
-    },
-    label: {
-        fontSize: FONT_SIZES.sm,
-        fontWeight: FONT_WEIGHTS.semibold,
-        color: colors.text,
-        marginBottom: SPACING.sm,
-    },
-
-    // SHOW PASSWORD
-    showPasswordContainer: {
-        alignSelf: 'flex-start',
-        marginBottom: SPACING.md,
-    },
-    showPasswordText: {
-        fontSize: FONT_SIZES.sm,
-        color: colors.primary,
-    },
-
-    // FORGOT PASSWORD
-    forgotPasswordContainer: {
-        alignSelf: 'flex-end',
-        marginBottom: SPACING.xl,
-    },
-    forgotPasswordText: {
-        fontSize: FONT_SIZES.sm,
-        color: colors.primary,
-        fontWeight: FONT_WEIGHTS.semibold,
-    },
-
-    // BUTTONS
-    loginButton: {
-        marginBottom: SPACING.md,
-    },
-    googleButton: {
-        marginBottom: SPACING.md,
-    },
-    registerButton: {
-        marginTop: SPACING.md,
-    },
-
-    // LOADER
-    loader: {
-        marginVertical: SPACING.md,
-    },
-
-    // DIVIDER
-    divider: {
+    disabled: { opacity: 0.7 },
+    dividerWrap: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: SPACING.xl,
+        marginVertical: 18,
     },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: colors.border,
+    divider: { flex: 1, height: 1, backgroundColor: '#E5E7EB' },
+    dividerText: { marginHorizontal: 10, color: '#9CA3AF', fontSize: 12 },
+    socialColumn: {
+        gap: 10,
+        marginBottom: 12,
     },
-    dividerText: {
-        marginHorizontal: SPACING.md,
-        fontSize: FONT_SIZES.xs,
-        color: colors.textLight,
-        fontWeight: FONT_WEIGHTS.semibold,
-    },
-
-    // FOOTER
-    footer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
+    socialBtn: {
+        height: 48,
+        borderRadius: 999,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        backgroundColor: '#FDBA74',
+        alignItems: 'center',
         justifyContent: 'center',
-        marginTop: SPACING.xxxl,
     },
-    footerText: {
-        fontSize: FONT_SIZES.xs,
-        color: colors.textLight,
+    socialTextRed: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#EF2B2B',
+        textTransform: 'uppercase',
     },
-    footerLink: {
-        fontSize: FONT_SIZES.xs,
-        color: colors.primary,
-        fontWeight: FONT_WEIGHTS.semibold,
+    socialOrange: {
+        backgroundColor: '#FDBA74',
+        borderColor: '#FDBA74',
     },
+    footerRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 6,
+    },
+    footerText: { fontSize: 13, color: '#6B7280' },
+    errorText: { fontSize: 12, color: '#F44336', marginTop: 4 },
 });
-
-export default LoginScreen;

@@ -12,6 +12,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { COLORS, TAB_NAMES } from '../constants';
 import { RootStackParamList, BottomTabParamList } from '../types';
+import { useTheme } from '../state/ThemeContext';
 
 // Import screens
 import LoginScreen from '../screens/LoginScreen';
@@ -60,32 +61,35 @@ const Tab = createBottomTabNavigator<BottomTabParamList>();
  * - Profile: Hồ sơ user
  */
 const BottomTabNavigator = () => {
+  const { colors } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={{
         // Style toàn bộ tab bar
         tabBarStyle: {
-          backgroundColor: COLORS.background,
-          borderTopColor: COLORS.border,
+          backgroundColor: colors.background,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
           paddingBottom: 5,
           height: 60,
         },
-        tabBarActiveTintColor: COLORS.primary,     // Màu icon khi active
-        tabBarInactiveTintColor: COLORS.textLight, // Màu icon khi inactive
+        tabBarActiveTintColor: colors.primary,     // Màu icon khi active
+        tabBarInactiveTintColor: colors.textLight, // Màu icon khi inactive
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600' as const,
         },
         headerShown: true,
         headerStyle: {
-          backgroundColor: COLORS.background,
-          borderBottomColor: COLORS.border,
+          backgroundColor: colors.background,
+          borderBottomColor: colors.border,
           borderBottomWidth: 1,
         },
         headerTitleStyle: {
           fontWeight: 'bold' as const,
           fontSize: 18,
+          color: colors.text,
         },
       }}
     >
@@ -101,7 +105,12 @@ const BottomTabNavigator = () => {
               <Text style={{ fontSize: 20 }}>🏠</Text>
             </View>
           ),
-          headerTitle: '🛍️ SHOP ONLINE',
+          headerTitle: '🛍️ TECHNOLOGY STORE',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            letterSpacing: 0.6,
+            textTransform: 'uppercase' as const,
+          },
         }}
       />
 
@@ -188,18 +197,21 @@ const BottomTabNavigator = () => {
  * - Settings: Cài đặt
  */
 export const RootNavigator = () => {
+  const { colors } = useTheme();
+
   return (
     <Stack.Navigator
       initialRouteName="Login"
       screenOptions={{
         headerStyle: {
-          backgroundColor: COLORS.background,
+          backgroundColor: colors.background,
         },
         headerTitleStyle: {
           fontWeight: 'bold' as const,
           fontSize: 18,
+          color: colors.text,
         },
-        headerTintColor: COLORS.primary,
+        headerTintColor: colors.primary,
       }}
     >
       {/* LOGIN SCREEN */}

@@ -23,9 +23,9 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import { Swipeable } from 'react-native-gesture-handler';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS, SHIPPING_OPTIONS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS, SHADOWS, SHIPPING_OPTIONS } from '../constants';
 import { useCart } from '../state/CartContext';
+import { useTheme } from '../state/ThemeContext';
 import CustomButton from '../components/CustomButton';
 import { formatPrice } from '../utils/formatting';
 import { CartItem } from '../types';
@@ -33,10 +33,13 @@ import { CartItem } from '../types';
 type CartScreenProps = { navigation: any };
 
 const CartScreen: React.FC<CartScreenProps> = ({ navigation }) => {
-  const { items, totalPrice, removeFromCart, updateQuantity } = useCart();
+  const { items, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [selectedShipping, setSelectedShipping] = useState('standard');
+
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
 
   // Tính phí shipping
   const shippingCost = SHIPPING_OPTIONS.find((s) => s.id === selectedShipping)?.cost || 0;
@@ -49,12 +52,12 @@ const CartScreen: React.FC<CartScreenProps> = ({ navigation }) => {
   const handleApplyPromo = () => {
     if (promoCode === 'SAVE50') {
       setPromoDiscount(subtotal * 0.5);
-      Alert.alert('Mã khuyến mãi', '✓ Áp dụng mã "SAVE50" giảm 50% thành công!');
+      Alert.alert('Khuyến mãi', '✓ Áp dụng mã "SAVE50" giảm 50% thành công!');
     } else if (promoCode === 'FREE10') {
       setPromoDiscount(100000);
-      Alert.alert('Mã khuyến mãi', '✓ Áp dụng mã "FREE10" giảm 100.000đ thành công!');
+      Alert.alert('Khuyến mãi', '✓ Áp dụng mã "FREE10" giảm 100.000đ thành công!');
     } else {
-      Alert.alert('Mã khuyến mãi', '✗ Mã khuyến mãi không hợp lệ');
+      Alert.alert('Khuyến mãi', '✗ Mã khuyến mãi không hợp lệ');
     }
     setPromoCode('');
   };
@@ -66,48 +69,6 @@ const CartScreen: React.FC<CartScreenProps> = ({ navigation }) => {
     }
     navigation.navigate('Checkout');
   };
-
-  const renderRightActions = (id: string) => (
-    <TouchableOpacity style={styles.swipeDelete} onPress={() => removeFromCart(id)}>
-      <Text style={styles.swipeDeleteIcon}>🗑️</Text>
-      <Text style={styles.swipeDeleteText}>Xóa</Text>
-    </TouchableOpacity>
-  );
-
-  const renderCartItem = ({ item }: { item: CartItem }) => (
-    <Swipeable renderRightActions={() => renderRightActions(item.id)}>
-      <View style={styles.cartItem}>
-        <Image source={{ uri: item.image }} style={styles.itemImage} />
-
-        <View style={styles.itemInfo}>
-          <Text style={styles.itemName} numberOfLines={2}>
-            {item.name}
-          </Text>
-          <Text style={styles.itemPrice}>{formatPrice(item.price)}</Text>
-
-          <View style={styles.quantityContainer}>
-            <TouchableOpacity
-              onPress={() => updateQuantity(item.id, item.quantity - 1)}
-              style={styles.quantityButton}
-            >
-              <Text style={styles.quantityButtonText}>−</Text>
-            </TouchableOpacity>
-            <Text style={styles.quantity}>{item.quantity}</Text>
-            <TouchableOpacity
-              onPress={() => updateQuantity(item.id, item.quantity + 1)}
-              style={styles.quantityButton}
-            >
-              <Text style={styles.quantityButtonText}>+</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <TouchableOpacity onPress={() => removeFromCart(item.id)} style={styles.removeButton}>
-          <Text style={styles.removeIcon}>🗑️</Text>
-        </TouchableOpacity>
-      </View>
-    </Swipeable>
-  );
 
   // ============================================================
   // EMPTY CART
@@ -138,143 +99,175 @@ const CartScreen: React.FC<CartScreenProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: SPACING.xxxl * 2 }}
-        >
-          {/* CART ITEMS */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Giỏ hàng ({items.length} sản phẩm)</Text>
-            <FlatList
-              data={items}
-              renderItem={renderCartItem}
-              keyExtractor={(item: CartItem) => item.id}
-              scrollEnabled={false}
-              ItemSeparatorComponent={() => <View style={styles.itemDivider} />}
-            />
-          </View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* CART ITEMS */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Giỏ hàng ({items.length} sản phẩm)</Text>
+          <FlatList
+            data={items}
+            renderItem={({ item }: { item: CartItem }) => (
+              <View style={styles.cartItem}>
+                {/* Hình ảnh */}
+                <Image
+                  source={{ uri: item.image }}
+                  style={styles.itemImage}
+                />
 
-          {/* PROMO CODE */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Mã khuyến mãi</Text>
-            <View style={styles.promoContainer}>
-              <TextInput
-                style={styles.promoInput}
-                placeholder="Nhập mã khuyến mãi"
-                value={promoCode}
-                onChangeText={setPromoCode}
-              />
-              <CustomButton
-                title="Áp dụng"
-                onPress={handleApplyPromo}
-                variant="secondary"
-                size="small"
-              />
-            </View>
-            <Text style={styles.promoHint}>💡 Hãy thử: SAVE50, FREE10</Text>
-          </View>
+                {/* Thông tin */}
+                <View style={styles.itemInfo}>
+                  <Text style={styles.itemName} numberOfLines={2}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.itemPrice}>
+                    {formatPrice(item.price)}
+                  </Text>
 
-          {/* SHIPPING OPTIONS */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Chọn vận chuyển</Text>
-            {SHIPPING_OPTIONS.map((option) => (
-              <TouchableOpacity
-                key={option.id}
-                style={[
-                  styles.shippingOption,
-                  selectedShipping === option.id && styles.shippingOptionActive,
-                ]}
-                onPress={() => setSelectedShipping(option.id)}
-              >
-                <View style={styles.shippingRadio}>
-                  {selectedShipping === option.id && (
-                    <View style={styles.shippingRadioSelected} />
-                  )}
+                  {/* Quantity Selector */}
+                  <View style={styles.quantityContainer}>
+                    <TouchableOpacity
+                      onPress={() => updateQuantity(item.id, item.quantity - 1)}
+                      style={styles.quantityButton}
+                    >
+                      <Text style={styles.quantityButtonText}>−</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.quantity}>{item.quantity}</Text>
+                    <TouchableOpacity
+                      onPress={() => updateQuantity(item.id, item.quantity + 1)}
+                      style={styles.quantityButton}
+                    >
+                      <Text style={styles.quantityButtonText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-                <View style={styles.shippingInfo}>
-                  <Text style={styles.shippingName}>{option.name}</Text>
-                  <Text style={styles.shippingDesc}>{option.description}</Text>
-                </View>
-                <Text style={styles.shippingPrice}>{formatPrice(option.cost)}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
 
-          {/* ORDER SUMMARY */}
-          <View style={[styles.section, styles.summaryContainer]}>
-            <Text style={styles.sectionTitle}>Tóm tắt đơn hàng</Text>
-
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Tiền hàng:</Text>
-              <Text style={styles.summaryValue}>{formatPrice(subtotal)}</Text>
-            </View>
-
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Vận chuyển:</Text>
-              <Text style={styles.summaryValue}>{formatPrice(shippingCost)}</Text>
-            </View>
-
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Thuế:</Text>
-              <Text style={styles.summaryValue}>{formatPrice(tax)}</Text>
-            </View>
-
-            {promoDiscount > 0 && (
-              <View style={styles.summaryRow}>
-                <Text style={[styles.summaryLabel, styles.discountLabel]}>
-                  Giảm giá:
-                </Text>
-                <Text style={[styles.summaryValue, styles.discountValue]}>
-                  -{formatPrice(promoDiscount)}
-                </Text>
+                {/* Remove Button */}
+                <TouchableOpacity
+                  onPress={() => removeFromCart(item.id)}
+                  style={styles.removeButton}
+                >
+                  <Text style={styles.removeIcon}>🗑️</Text>
+                </TouchableOpacity>
               </View>
             )}
+            keyExtractor={(item: CartItem) => item.id}
+            scrollEnabled={false}
+          />
+        </View>
 
-            <View style={[styles.summaryRow, styles.totalRow]}>
-              <Text style={styles.totalLabel}>Tổng cộng:</Text>
-              <Text style={styles.totalValue}>{formatPrice(finalTotal)}</Text>
-            </View>
-          </View>
-
-          {/* BUTTONS */}
-          <View style={styles.buttonsContainer}>
+        {/* PROMO CODE */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Mã khuyến mãi</Text>
+          <View style={styles.promoContainer}>
+            <TextInput
+              style={styles.promoInput}
+              placeholder="Nhập mã khuyến mãi"
+              placeholderTextColor={colors.textLight}
+              value={promoCode}
+              onChangeText={setPromoCode}
+            />
             <CustomButton
-              title="Tiếp tục mua sắm"
-              onPress={() => navigation.navigate('Home')}
-              variant="outline"
-              size="large"
-              style={styles.button}
+              title="Áp dụng"
+              onPress={handleApplyPromo}
+              variant="secondary"
+              size="small"
             />
           </View>
-        </ScrollView>
-      </View>
-
-      <View style={styles.checkoutBar}>
-        <View style={styles.checkoutInfo}>
-          <Text style={styles.checkoutLabel}>Tổng cộng</Text>
-          <Text style={styles.checkoutValue}>{formatPrice(finalTotal)}</Text>
-          <Text style={styles.checkoutSub}>Đã gồm thuế và phí vận chuyển</Text>
+          <Text style={styles.promoHint}>💡 Hãy thử: SAVE50, FREE10</Text>
         </View>
-        <CustomButton
-          title="Tiến hành thanh toán"
-          onPress={handleCheckout}
-          variant="primary"
-          size="large"
-          style={styles.checkoutBarButton}
-        />
-      </View>
+
+        {/* SHIPPING OPTIONS */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Chọn vận chuyển</Text>
+          {SHIPPING_OPTIONS.map((option) => (
+            <TouchableOpacity
+              key={option.id}
+              style={[
+                styles.shippingOption,
+                selectedShipping === option.id && styles.shippingOptionActive,
+              ]}
+              onPress={() => setSelectedShipping(option.id)}
+            >
+              <View style={[styles.shippingRadio, { borderColor: selectedShipping === option.id ? colors.primary : colors.textLight }]}>
+                {selectedShipping === option.id && (
+                  <View style={styles.shippingRadioSelected} />
+                )}
+              </View>
+              <View style={styles.shippingInfo}>
+                <Text style={styles.shippingName}>{option.name}</Text>
+                <Text style={styles.shippingDesc}>{option.description}</Text>
+              </View>
+              <Text style={styles.shippingPrice}>{formatPrice(option.cost)}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* ORDER SUMMARY */}
+        <View style={[styles.section, styles.summaryContainer]}>
+          <Text style={styles.sectionTitle}>Tóm tắt đơn hàng</Text>
+
+          {/* Items */}
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Tiền hàng:</Text>
+            <Text style={styles.summaryValue}>{formatPrice(subtotal)}</Text>
+          </View>
+
+          {/* Shipping */}
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Vận chuyển:</Text>
+            <Text style={styles.summaryValue}>{formatPrice(shippingCost)}</Text>
+          </View>
+
+          {/* Tax */}
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Thuế:</Text>
+            <Text style={styles.summaryValue}>{formatPrice(tax)}</Text>
+          </View>
+
+          {/* Discount */}
+          {promoDiscount > 0 && (
+            <View style={styles.summaryRow}>
+              <Text style={[styles.summaryLabel, styles.discountLabel]}>
+                Giảm giá:
+              </Text>
+              <Text style={[styles.summaryValue, styles.discountValue]}>
+                -{formatPrice(promoDiscount)}
+              </Text>
+            </View>
+          )}
+
+          {/* Total */}
+          <View style={[styles.summaryRow, styles.totalRow]}>
+            <Text style={styles.totalLabel}>Tổng cộng:</Text>
+            <Text style={styles.totalValue}>{formatPrice(finalTotal)}</Text>
+          </View>
+        </View>
+
+        {/* BUTTONS */}
+        <View style={styles.buttonsContainer}>
+          <CustomButton
+            title="Tiếp tục mua sắm"
+            onPress={() => navigation.navigate('Home')}
+            variant="outline"
+            size="large"
+            style={styles.button}
+          />
+          <CustomButton
+            title="Tiến hành thanh toán"
+            onPress={handleCheckout}
+            variant="primary"
+            size="large"
+            style={styles.button}
+          />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  content: {
-    flex: 1,
+    backgroundColor: colors.background,
   },
   emptyContainer: {
     flex: 1,
@@ -289,12 +282,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: FONT_SIZES.xl,
     fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.text,
+    color: colors.text,
     marginBottom: SPACING.sm,
   },
   emptyText: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.textLight,
+    color: colors.textLight,
     textAlign: 'center',
     marginBottom: SPACING.lg,
   },
@@ -306,7 +299,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.text,
+    color: colors.text,
     marginBottom: SPACING.md,
   },
 
@@ -315,35 +308,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: colors.border,
     gap: SPACING.md,
-  },
-  itemDivider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-  },
-  swipeDelete: {
-    width: 80,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.error,
-    borderRadius: BORDER_RADIUS.md,
-    marginVertical: SPACING.xs,
-  },
-  swipeDeleteIcon: {
-    fontSize: 20,
-    color: COLORS.textInverse,
-  },
-  swipeDeleteText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textInverse,
-    marginTop: 4,
   },
   itemImage: {
     width: 80,
     height: 80,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.backgroundDark,
+    backgroundColor: colors.backgroundDark,
   },
   itemInfo: {
     flex: 1,
@@ -352,12 +324,12 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.semibold,
-    color: COLORS.text,
+    color: colors.text,
   },
   itemPrice: {
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.primary,
+    color: colors.primary,
   },
   quantityContainer: {
     flexDirection: 'row',
@@ -368,25 +340,26 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: COLORS.backgroundDark,
+    backgroundColor: colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quantityButtonText: {
     fontSize: FONT_SIZES.lg,
-    color: COLORS.primary,
+    color: colors.primary,
     fontWeight: FONT_WEIGHTS.bold,
   },
   quantity: {
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.semibold,
-    color: COLORS.text,
+    color: colors.text,
   },
   removeButton: {
     padding: SPACING.sm,
   },
   removeIcon: {
     fontSize: 20,
+    color: colors.textLight,
   },
 
   // PROMO
@@ -397,16 +370,16 @@ const styles = StyleSheet.create({
   promoInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: colors.border,
     borderRadius: BORDER_RADIUS.md,
     paddingHorizontal: SPACING.md,
     fontSize: FONT_SIZES.md,
-    color: COLORS.text,
+    color: colors.text,
     height: 40,
   },
   promoHint: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textLight,
+    color: colors.textLight,
     marginTop: SPACING.sm,
   },
 
@@ -417,19 +390,18 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: colors.border,
     borderRadius: BORDER_RADIUS.md,
   },
   shippingOptionActive: {
-    borderColor: COLORS.primary,
-    backgroundColor: COLORS.primaryLight + '20',
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryLight + '20',
   },
   shippingRadio: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: COLORS.primary,
     marginRight: SPACING.md,
     justifyContent: 'center',
     alignItems: 'center',
@@ -438,7 +410,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
   },
   shippingInfo: {
     flex: 1,
@@ -446,21 +418,21 @@ const styles = StyleSheet.create({
   shippingName: {
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.semibold,
-    color: COLORS.text,
+    color: colors.text,
   },
   shippingDesc: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textLight,
+    color: colors.textLight,
   },
   shippingPrice: {
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.primary,
+    color: colors.primary,
   },
 
   // SUMMARY
   summaryContainer: {
-    backgroundColor: COLORS.backgroundDark,
+    backgroundColor: colors.backgroundDark,
     borderRadius: BORDER_RADIUS.lg,
   },
   summaryRow: {
@@ -470,34 +442,34 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.text,
+    color: colors.text,
   },
   summaryValue: {
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.semibold,
-    color: COLORS.text,
+    color: colors.text,
   },
   discountLabel: {
-    color: COLORS.success,
+    color: colors.success,
   },
   discountValue: {
-    color: COLORS.success,
+    color: colors.success,
   },
   totalRow: {
     borderTopWidth: 2,
-    borderTopColor: COLORS.border,
+    borderTopColor: colors.border,
     paddingVertical: SPACING.md,
     marginTop: SPACING.md,
   },
   totalLabel: {
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.text,
+    color: colors.text,
   },
   totalValue: {
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.primary,
+    color: colors.primary,
   },
 
   // BUTTONS
@@ -508,41 +480,6 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: SPACING.sm,
-  },
-
-  checkoutBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    backgroundColor: COLORS.background,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-  },
-  checkoutInfo: {
-    flex: 1,
-  },
-  checkoutLabel: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textLight,
-  },
-  checkoutValue: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.primary,
-  },
-  checkoutSub: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.textLight,
-  },
-  checkoutBarButton: {
-    flex: 1,
-    marginLeft: SPACING.md,
   },
 });
 

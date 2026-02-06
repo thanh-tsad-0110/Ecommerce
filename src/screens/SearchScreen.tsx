@@ -12,9 +12,12 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  SafeAreaView,
+  Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import {
   COLORS,
   SPACING,
@@ -22,8 +25,10 @@ import {
   FONT_WEIGHTS,
   BORDER_RADIUS,
 } from '../constants';
+import { useTheme } from '../state/ThemeContext';
 import {
   RootStackParamList,
+  BottomTabParamList,
   Product,
   ProductFilters,
   SortOption,
@@ -33,9 +38,9 @@ import { useFavorites } from '../state/FavoritesContext';
 import { useCart } from '../state/CartContext';
 import { mockProducts } from '../constants/mockData';
 
-type SearchScreenProps = NativeStackScreenProps<
-  RootStackParamList,
-  'Search'
+type SearchScreenProps = CompositeScreenProps<
+  BottomTabScreenProps<BottomTabParamList, 'Search'>,
+  NativeStackScreenProps<RootStackParamList>
 >;
 
 const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
@@ -99,7 +104,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       quantity: 1,
       image: product.image,
     });
-    alert(`✓ ${product.name} đã được thêm vào giỏ hàng`);
+    Alert.alert('Thêm vào giỏ', `✓ ${product.name} đã được thêm vào giỏ hàng`);
   };
 
   const handleToggleFavorite = (product: Product) => {
@@ -120,12 +125,15 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
   };
 
   // ================= RENDER =================
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
+
   const renderSearchResults = () => {
     if (isSearching) {
       return (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text>Đang tìm kiếm...</Text>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={{ color: colors.text }}>Đang tìm kiếm...</Text>
         </View>
       );
     }
@@ -134,7 +142,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       return (
         <View style={styles.center}>
           <Text style={{ fontSize: 40 }}>🔍</Text>
-          <Text>Không tìm thấy kết quả</Text>
+          <Text style={{ color: colors.text }}>Không tìm thấy kết quả</Text>
         </View>
       );
     }
@@ -143,12 +151,12 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       <FlatList
         data={searchResults}
         key={viewType}
-        keyExtractor={item => item.id}
+        keyExtractor={(item: Product) => item.id}
         numColumns={viewType === 'grid' ? 2 : 1}
         columnWrapperStyle={
           viewType === 'grid' ? styles.columnWrapper : undefined
         }
-        renderItem={({ item }) => (
+        renderItem={({ item }: { item: Product }) => (
           <ProductCard
             product={item}
             variant={viewType}
@@ -171,6 +179,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
           <TextInput
             style={styles.searchInput}
             placeholder="Tìm kiếm sản phẩm..."
+            placeholderTextColor={colors.textLight}
             value={searchQuery}
             onChangeText={setSearchQuery}
             onSubmitEditing={() => handleSearch(searchQuery)}
@@ -189,7 +198,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
                   handleSearch(item);
                 }}
               >
-                <Text>{item}</Text>
+                <Text style={{ color: colors.text }}>{item}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -198,7 +207,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
         {/* SORT */}
         {searchResults.length > 0 && (
           <View style={styles.sortRow}>
-            {['popularity', 'price_low', 'price_high', 'rating'].map(option => (
+            {['popularity', 'price_low', 'price_high', 'rating'].map((option) => (
               <TouchableOpacity
                 key={option}
                 style={[
@@ -207,15 +216,15 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
                 ]}
                 onPress={() => handleSortChange(option as SortOption)}
               >
-                <Text>{option}</Text>
+                <Text style={{ color: sortBy === option ? colors.textInverse : colors.text }}>{option}</Text>
               </TouchableOpacity>
             ))}
 
             <TouchableOpacity onPress={() => setViewType('grid')}>
-              <Text>▦</Text>
+              <Text style={{ color: colors.text }}>▦</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setViewType('list')}>
-              <Text>☰</Text>
+              <Text style={{ color: colors.text }}>☰</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -226,14 +235,15 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const getStyles = (colors: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   searchBar: { padding: SPACING.lg },
   searchInput: {
-    backgroundColor: COLORS.backgroundDark,
+    backgroundColor: colors.backgroundDark,
     borderRadius: BORDER_RADIUS.full,
     paddingHorizontal: SPACING.md,
     height: 40,
+    color: colors.text,
   },
   tags: {
     flexDirection: 'row',
@@ -245,7 +255,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.full,
-    backgroundColor: COLORS.backgroundDark,
+    backgroundColor: colors.backgroundDark,
   },
   sortRow: {
     flexDirection: 'row',
@@ -257,11 +267,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: colors.border,
     borderRadius: BORDER_RADIUS.sm,
   },
   sortActive: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
   },
   center: {
     alignItems: 'center',

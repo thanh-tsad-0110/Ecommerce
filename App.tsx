@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import { StyleSheet, StatusBar } from 'react-native';
+import { StatusBar, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
@@ -27,6 +27,13 @@ import { ThemeProvider, useTheme } from './src/state/ThemeContext';
 
 // Import main navigation setup
 import RootNavigator from './src/navigation/RootNavigator';
+import ErrorBoundary from './src/components/ErrorBoundary';
+
+type GestureRootProps = React.ComponentProps<typeof GestureHandlerRootView> & {
+  style?: any;
+};
+
+const GHRoot = GestureHandlerRootView as React.ComponentType<GestureRootProps>;
 
 const AppContent: React.FC = () => {
   const { colors, isDark } = useTheme();
@@ -49,29 +56,28 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <SafeAreaProvider>
-        {/* NESTED PROVIDERS - Order matters! */}
-        <CartProvider>
-          <FavoritesProvider>
-            <UserProvider>
-              <ThemeProvider>
-                <AppContent />
-              </ThemeProvider>
-            </UserProvider>
-          </FavoritesProvider>
-        </CartProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <GHRoot style={styles.container}>
+      <ErrorBoundary>
+        <SafeAreaProvider>
+          <CartProvider>
+            <FavoritesProvider>
+              <UserProvider>
+                <ThemeProvider>
+                  <AppContent />
+                </ThemeProvider>
+              </UserProvider>
+            </FavoritesProvider>
+          </CartProvider>
+        </SafeAreaProvider>
+      </ErrorBoundary>
+    </GHRoot>
   );
 };
 
-// EXPLANATION: Styles for the root container
-// flex: 1 makes it fill entire screen
+export default App;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
 });
-
-export default App;

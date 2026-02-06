@@ -8,9 +8,9 @@ import { useUIStore } from './uiStore';
 
 // Light Theme Colors
 export const LIGHT_COLORS = {
-    primary: '#FF6B35',
-    primaryLight: '#FFB399',
-    primaryDark: '#D64423',
+    primary: '#E53935',
+    primaryLight: '#FF8A80',
+    primaryDark: '#C62828',
     secondary: '#004E89',
     secondaryLight: '#1982C4',
     background: '#FFFFFF',
@@ -32,9 +32,9 @@ export const LIGHT_COLORS = {
 
 // Dark Theme Colors
 export const DARK_COLORS = {
-    primary: '#FF6B35',
-    primaryLight: '#FFB399',
-    primaryDark: '#D64423',
+    primary: '#E53935',
+    primaryLight: '#FF8A80',
+    primaryDark: '#C62828',
     secondary: '#1982C4',
     secondaryLight: '#4A9FD8',
     background: '#121212',        // Nền đen
